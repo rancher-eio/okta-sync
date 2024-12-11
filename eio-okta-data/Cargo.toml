@@ -1,0 +1,94 @@
+[package]
+name = "eio-okta-data"
+version = "0.1.0"
+description = "Data Types for Okta"
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+
+[features]
+default = [
+  "arbitrary",
+  "builder",
+  "clap",
+  "comparable",
+  "dummy",
+  "educe",
+  "patch",
+  "proptest",
+  "schemars",
+  "serde",
+  "strum",
+  "validate",
+]
+
+arbitrary = ["dep:arbitrary", "chrono/arbitrary"]
+builder = ["dep:derive_builder"]
+clap = ["dep:clap"]
+comparable = ["dep:comparable"]
+dummy = ["dep:fake", "proptest", "dep:rand", "dep:constcat"]
+educe = ["dep:educe"]
+patch = ["dep:struct-patch"]
+proptest = ["dep:proptest", "dep:proptest-derive", "dep:test-strategy"]
+schemars = ["dep:schemars"]
+serde = [
+  "dep:serde",
+  "chrono/serde",
+  "comparable?/serde",
+  "email_address/serde_support",
+  "mediatype/serde",
+  "rand?/serde1",
+]
+strum = ["dep:strum"]
+validate = ["dep:validator"]
+
+[dependencies]
+chrono.workspace = true
+email_address.workspace = true
+macro_rules_attribute.workspace = true
+mediatype.workspace = true
+remain.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
+
+arbitrary = { workspace = true, optional = true, features = ["derive"] }
+clap = { workspace = true, optional = true, features = ["derive", "std"] }
+comparable = { workspace = true, optional = true, features = ["derive"] }
+constcat = { workspace = true, optional = true }
+derive_builder = { workspace = true, optional = true, features = ["std"] }
+educe = { workspace = true, optional = true, features = [
+  "Clone",
+  "Debug",
+  "Default",
+  "Eq",
+  "Hash",
+  "PartialEq",
+] }
+fake = { workspace = true, optional = true, features = [
+  "chrono",
+  "derive",
+  "rand_core",
+  "serde_json",
+] }
+proptest = { workspace = true, optional = true, features = [
+  "attr-macro",
+  "std",
+] }
+proptest-derive = { workspace = true, optional = true }
+rand = { workspace = true, optional = true }
+schemars = { workspace = true, optional = true, features = [
+  "derive",
+  "chrono",
+] }
+serde = { workspace = true, optional = true, features = ["derive"] }
+struct-patch = { workspace = true, optional = true, features = [
+  "merge",
+  "std",
+] }
+strum = { workspace = true, optional = true, features = ["derive", "std"] }
+test-strategy = { workspace = true, optional = true }
+validator = { workspace = true, optional = true, features = ["derive"] }
+serde_yml.workspace = true

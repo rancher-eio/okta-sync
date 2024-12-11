@@ -1,0 +1,27 @@
+[package]
+name = "eio-okta-api"
+version = "0.1.0"
+description = "API Types for Okta"
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+
+[dependencies]
+eio-okta-data.workspace = true
+
+headers.workspace = true
+http.workspace = true
+remain.workspace = true
+scim_proto.workspace = true
+serde_qs.workspace = true
+serde_urlencoded.workspace = true
+thiserror.workspace = true
+
+clap = { workspace = true, features = ["derive", "std"] }
+iri-string = { workspace = true, features = ["serde", "std"] }
+serde = { workspace = true, features = ["derive", "std"] }
+validator = { workspace = true, features = ["derive"] }

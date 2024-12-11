@@ -1,0 +1,40 @@
+[package]
+name = "eio-okta-client"
+version = "0.1.0"
+description = "Okta Client Library and CLI"
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+
+[dependencies]
+eio-okta-api.workspace = true
+
+educe.workspace = true
+headers.workspace = true
+http.workspace = true
+humantime-serde.workspace = true
+humantime.workspace = true
+remain.workspace = true
+thiserror.workspace = true
+
+clap = { workspace = true, features = [
+  "derive",
+  "env",
+  "string",
+  "std",
+  "unicode",
+  "wrap_help",
+] }
+miette = { workspace = true, features = ["derive", "fancy", "serde"] }
+serde = { workspace = true, features = ["derive", "std"] }
+serde_json = { workspace = true, features = ["preserve_order"] }
+ureq = { workspace = true, features = ["tls", "http-crate", "json"] }
+parse_link_header = { workspace = true, features = ["http"] }
+
+
+[package.metadata.cargo-shear]
+ignored = ["humantime-serde"]

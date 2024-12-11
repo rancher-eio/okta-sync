@@ -1,0 +1,51 @@
+[package]
+name = "eio-okta-sync"
+version = "0.1.0"
+description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+
+[dependencies]
+eio-okta-api.workspace = true
+eio-okta-client.workspace = true
+eio-okta-data.workspace = true
+
+fs-err.workspace = true
+remain.workspace = true
+serde_yml.workspace = true
+thiserror.workspace = true
+
+camino = { workspace = true, features = ["serde1"] }
+clap = { workspace = true, features = [
+  "color",
+  "derive",
+  "env",
+  "error-context",
+  "help",
+  "std",
+  "string",
+  "suggestions",
+  "unicode",
+  "usage",
+  "wrap_help",
+] }
+indexmap = { workspace = true, features = ["serde"] }
+iri-string = { workspace = true, features = ["serde"] }
+miette = { workspace = true, features = ["derive", "fancy", "serde"] }
+serde = { workspace = true, features = ["derive", "std"] }
+serde_json = { workspace = true, features = ["preserve_order"] }
+tokio = { workspace = true, features = ["full"] }
+
+octocrab = "0.42.1"
+
+[[bench]]
+name = "query_string"
+harness = false
+
+[dev-dependencies]
+divan.workspace = true

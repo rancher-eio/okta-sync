@@ -1,0 +1,87 @@
+[workspace]
+resolver = "2"
+members = ["eio-okta-sync", "eio-okta-api", "eio-okta-client", "eio-okta-data"]
+
+[workspace.package]
+rust-version = "1.81"
+edition = "2021"
+license = "MIT"
+homepage = "https://github.com/rancher-eio/okta-sync"
+repository = "https://github.com/rancher-eio/okta-sync"
+authors = ["Chris Olstrom <chris@olstrom.com>"]
+keywords = ["EIO"]
+
+[workspace.dependencies]
+# Internal Crates
+eio-okta-api = { path = "eio-okta-api", version = "0.1.0" }
+eio-okta-client = { path = "eio-okta-client", version = "0.1.0" }
+eio-okta-data = { path = "eio-okta-data", version = "0.1.0" }
+
+# Unmerged Upstream Patches
+comparable = { version = "0.5.4", git = "https://github.com/jwiegley/comparable.git", rev = "refs/pull/5/head", default-features = false, features = [
+  "derive",
+] }
+proptest = { version = "1.5.0", git = "https://github.com/proptest-rs/proptest.git", rev = "refs/pull/530/head", default-features = false, features = [
+  "attr-macro",
+  "std",
+] }
+proptest-derive = { version = "0.5.0", git = "https://github.com/proptest-rs/proptest.git", rev = "refs/pull/530/head", default-features = false }
+
+# Dependencies
+chrono = { version = "0.4.38", default-features = false }
+clap = { version = "4.5.20", default-features = false }
+derive_builder = { version = "^0.20", default-features = false }
+divan = { version = "0.1.14", default-features = false }
+educe = { version = "0.6.0", default-features = false }
+email_address = { version = "0.2.9", default-features = false }
+http = { version = "1.1.0", default-features = false }
+indexmap = { version = "2.6.0", default-features = false }
+iri-string = { version = "0.7.7", default-features = false }
+mediatype = { version = "0.19.18", default-features = false }
+miette = { version = "7.2.0", default-features = false }
+parse_link_header = { version = "0.4.0", default-features = false }
+rand = { version = "0.8.5", default-features = false }
+schemars = { version = "0.8.21", default-features = false }
+serde = { version = "1.0.213", default-features = false }
+serde_json = { version = "1.0.132", default-features = false }
+serde_qs = { version = "0.13.0", default-features = false }
+struct-patch = { version = "^0.8, >= 0.8.6" }
+strum = { version = "0.26.3" }
+tokio = { version = "1.41.0", default-features = false }
+ureq = { version = "2.10.1", default-features = false }
+
+# empty default features
+arbitrary = { version = "1.3.2", default-features = false }
+camino = { version = "1.1.9", default-features = false }
+constcat = { version = "0.5.1", default-features = false }
+fake = { version = "^ 3, >= 3.0.1", default-features = false }
+fs-err = { version = "3.0.0", default-features = false }
+headers = { version = "0.4.0", default-features = false }
+macro_rules_attribute = { version = "0.2.0", default-features = false }
+serde_yml = { version = "0.0.12", default-features = false }
+validator = { version = "0.19.0", default-features = false }
+
+# no features
+humantime = "2.1.0"
+humantime-serde = "1.1.1"
+remain = "0.2.14"
+scim_proto = "1.4.3"
+serde_urlencoded = "0.7.1"
+test-strategy = "0.4.0"
+thiserror = "1.0.65"
+
+[profile.dev]
+split-debuginfo = "packed"
+opt-level = 0
+codegen-units = 256
+lto = false
+
+[profile.release]
+codegen-units = 1
+incremental = true
+lto = true
+opt-level = "z"
+strip = true
+
+[workspace.metadata.cargo-shear]
+ignored = ["humantime-serde"]
