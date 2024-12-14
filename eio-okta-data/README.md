@@ -1,4 +1,4 @@
-# okta-data - Data Types for Okta
+# eio-okta-data - Data Types for Okta
 
 This crate contains data types only.
 
@@ -107,3 +107,18 @@ The `Option<Option<T>>` there is the part that feels a bit weird, right? The rea
 Some fields like `User::embedded` do not have a fixed definition in the [Okta Managment API OpenAPI Specification](https://github.com/okta/okta-management-openapi-spec), and so are represented as `serde_json::Value`, so you can define your own conversions for whatever sort of data you happen to put in there.
 
 However, given that these fields are unspecified, they're also untestable within the scope of this crate. As such, several features (notably testing-oriented ones such as `comparable`, `proptest`, `dummy`, and `arbitrary`) simply ignore these fields.
+
+## License
+
+```text
+SPDX-License-Identifier: MIT OR Apache-2.0
+```
+
+`eio-okta-data` is available under [your choice](https://fossa.com/blog/dual-licensing-models-explained/) of *either* the [MIT License](https://colstrom.mit-license.org) *or* the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+See [`LICENSE-MIT`](../LICENSE-MIT) and [`LICENSE-APACHE`](../LICENSE-APACHE) at the root of the repository for the full text of each.
+
+Both are written in fancy lawyer-speak. If you prefer more down-to-earth language, consider the following:
+
+- tl;drLegal has simple visual summaries available: [`MIT`](https://www.tldrlegal.com/license/mit-license) or [`Apache-2.0`](https://www.tldrlegal.com/license/apache-license-2-0-apache-2-0)
+- FOSSA has more in-depth overviews available: [`MIT`](https://fossa.com/blog/open-source-licenses-101-mit-license/) or [`Apache-2.0`](https://fossa.com/blog/open-source-licenses-101-apache-license-2-0/)

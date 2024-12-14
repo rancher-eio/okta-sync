@@ -11,12 +11,16 @@ pub struct OktaService {
   #[arg(id = "okta_service_authority")]
   #[arg(long = "okta-service-authority")]
   #[arg(value_name = "HOST[:PORT]")]
+  #[arg(help_heading = "Okta Service Options")]
+  #[arg(help = "Host and (optional) Port for Okta Service")]
   pub authority: Authority,
   #[arg(default_value = "https")]
   #[arg(env = "OKTA_SERVICE_SCHEME")]
   #[arg(id = "okta_service_scheme")]
   #[arg(long = "okta-service-scheme")]
   #[arg(value_name = "SCHEME")]
+  #[arg(help_heading = "Okta Service Options")]
+  #[arg(help = "Protocol Scheme for Okta Service")]
   pub scheme: Scheme,
 }
 

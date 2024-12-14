@@ -2,8 +2,9 @@ use crate::crossplane::ProviderConfigReference;
 use crate::okta::Snapshot;
 use crate::{crossplane, github, kubernetes};
 use camino::Utf8PathBuf;
+use fs_err::File;
 use std::collections::{HashMap, HashSet};
-use std::{fs::File, io::Read};
+use std::io::Read;
 
 #[derive(Debug, Clone, PartialEq, Eq, clap::Args)]
 #[remain::sorted]
@@ -53,47 +54,65 @@ orgs:                      ########## orgs to create resources for
   snapshot: Utf8PathBuf,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct Mappings {
-  expectations: Expectations,
-  orgs: Vec<OrgMapping>,
-  roles: Vec<RoleMapping>,
-  teams: Vec<TeamMapping>,
+pub(crate) struct Mappings {
+  pub(crate) expectations: Expectations,
+  pub(crate) orgs: Vec<OrgMapping>,
+  pub(crate) roles: Vec<RoleMapping>,
+  pub(crate) teams: Vec<TeamMapping>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct Expectations {
-  okta_groups: Vec<OktaGroupExpectation>,
+pub(crate) struct Expectations {
+  pub(crate) okta_groups: Vec<OktaGroupExpectation>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct OktaGroupExpectation {
-  id: String,
-  profile_name: String,
+pub(crate) struct OktaGroupExpectation {
+  pub(crate) id: String,
+  pub(crate) profile_name: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct OrgMapping {
-  github_org_name: String,
-  okta_profile_github_org: String,
+impl std::fmt::Display for OktaGroupExpectation {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    self.profile_name.fmt(f)
+  }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct RoleMapping {
-  github_member_role: github::membership::Role,
-  okta_profile_email: String,
+pub(crate) struct OrgMapping {
+  pub(crate) github_org_name: String,
+  pub(crate) okta_profile_github_org: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct TeamMapping {
-  github_team_name: String,
-  okta_group_id: String,
+pub(crate) struct RoleMapping {
+  pub(crate) github_member_role: github::membership::Role,
+  pub(crate) okta_profile_email: String,
+}
+
+impl std::fmt::Display for RoleMapping {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    self.okta_profile_email.fmt(f)
+  }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct TeamMapping {
+  pub(crate) github_team_name: String,
+  pub(crate) okta_group_id: String,
+}
+
+impl std::fmt::Display for TeamMapping {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    self.github_team_name.fmt(f)
+  }
 }
 
 const LABEL_OKTA_GROUP_ID: &str = "suse.okta.com/group-id";

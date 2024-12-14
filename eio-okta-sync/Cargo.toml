@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-sync"
-version = "0.1.0"
+version = "0.2.0"
 description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
 rust-version.workspace = true
 edition.workspace = true
@@ -15,10 +15,13 @@ eio-okta-api.workspace = true
 eio-okta-client.workspace = true
 eio-okta-data.workspace = true
 
+constcat.workspace = true
 fs-err.workspace = true
+humantime.workspace = true
 remain.workspace = true
 serde_yml.workspace = true
 thiserror.workspace = true
+heck.workspace = true
 
 camino = { workspace = true, features = ["serde1"] }
 clap = { workspace = true, features = [
@@ -34,14 +37,30 @@ clap = { workspace = true, features = [
   "usage",
   "wrap_help",
 ] }
+console = { workspace = true, features = ["ansi-parsing", "unicode-width"] }
 indexmap = { workspace = true, features = ["serde"] }
 iri-string = { workspace = true, features = ["serde"] }
+inquire = { workspace = true, features = [
+  "crossterm",
+  "fuzzy",
+  "macros",
+  "one-liners",
+] }
+itertools = { workspace = true, features = ["use_std"] }
 miette = { workspace = true, features = ["derive", "fancy", "serde"] }
+semver = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true, features = ["derive", "std"] }
 serde_json = { workspace = true, features = ["preserve_order"] }
 tokio = { workspace = true, features = ["full"] }
+update-informer = { workspace = true, features = [
+  "crates",
+  "github",
+  "rustls-tls",
+  "ureq",
+] }
 
 octocrab = "0.42.1"
+rand.workspace = true
 
 [[bench]]
 name = "query_string"

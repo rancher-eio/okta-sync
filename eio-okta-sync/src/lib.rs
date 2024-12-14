@@ -10,8 +10,10 @@ pub mod okta;
 #[error(transparent)]
 #[allow(clippy::large_enum_variant)]
 #[remain::sorted]
+#[non_exhaustive]
 pub enum Error {
   Client(#[from] eio_okta_client::Error),
+  Inquire(#[from] inquire::error::InquireError),
   IO(#[from] std::io::Error),
   IriStringTemplate(#[from] iri_string::template::Error),
   IriStringValidate(#[from] iri_string::validate::Error),

@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-client"
-version = "0.1.0"
+version = "0.2.0"
 description = "Okta Client Library and CLI"
 rust-version.workspace = true
 edition.workspace = true

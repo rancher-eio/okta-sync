@@ -12,7 +12,9 @@ pub struct Standalone<T: Args + Serialize + DeserializeOwned> {
   client_options: Options,
   #[command(flatten)]
   endpoint: T,
-  #[arg(long, help = "pretty-print JSON output?")]
+  #[arg(long)]
+  #[arg(help_heading = "Output Options")]
+  #[arg(help = "pretty-print JSON output?")]
   pretty: bool,
 }
 

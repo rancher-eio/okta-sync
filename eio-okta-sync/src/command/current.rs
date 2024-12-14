@@ -1,10 +1,11 @@
 use crate::{crossplane, github, kubernetes};
 use camino::Utf8PathBuf;
 use clap::Parser;
+use fs_err::File;
 use iri_string::template::UriTemplateString;
 use iri_string::types::UriAbsoluteString;
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Read};
+use std::io::Read;
 
 #[derive(Debug, Parser)]
 #[remain::sorted]

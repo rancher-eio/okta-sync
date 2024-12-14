@@ -1,4 +1,4 @@
-# okta-client - Okta Client Library and CLI
+# eio-okta-client - Okta Client Library and CLI
 
 This crate wraps the abstract API provided by the `okta-data` crate in a concrete implementation, and provides a generic CLI for any specific API Endpoint supported by the `okta-api` crate, in addition to providing a unified CLI for those APIs.
 
@@ -53,3 +53,18 @@ Options:
       --pretty                                             pretty-print JSON output?
   -h, --help                                               Print help
 ```
+
+## License
+
+```text
+SPDX-License-Identifier: MIT OR Apache-2.0
+```
+
+`eio-okta-client` is available under [your choice](https://fossa.com/blog/dual-licensing-models-explained/) of *either* the [MIT License](https://colstrom.mit-license.org) *or* the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+See [`LICENSE-MIT`](../LICENSE-MIT) and [`LICENSE-APACHE`](../LICENSE-APACHE) at the root of the repository for the full text of each.
+
+Both are written in fancy lawyer-speak. If you prefer more down-to-earth language, consider the following:
+
+- tl;drLegal has simple visual summaries available: [`MIT`](https://www.tldrlegal.com/license/mit-license) or [`Apache-2.0`](https://www.tldrlegal.com/license/apache-license-2-0-apache-2-0)
+- FOSSA has more in-depth overviews available: [`MIT`](https://fossa.com/blog/open-source-licenses-101-mit-license/) or [`Apache-2.0`](https://fossa.com/blog/open-source-licenses-101-apache-license-2-0/)
