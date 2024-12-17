@@ -186,7 +186,12 @@ fn expectations(snapshot: &Snapshot, interactive: bool) -> Result<Expectations, 
   if interactive {
     let mut rng = thread_rng();
 
-    quiz(&groups, &mut rng)?;
+    if Confirm::new("Would you like a demonstration of the problem, using your snapshot data?")
+      .with_default(true)
+      .prompt()?
+    {
+      quiz(&groups, &mut rng)?;
+    }
   }
 
   eprintln!("\nTo mitigate this, we can indicate what we expect the profile name to be, this can be used to check these assumptions in future runs.");
@@ -204,7 +209,7 @@ const SKIP_QUIZ_MESSAGE: &str = "┬─┬ノ( º _ ºノ) fair enough, we can s
 
 fn quiz(groups: &[OktaGroupExpectation], rng: &mut impl Rng) -> Result<(), crate::Error> {
   if groups.len() > 1 {
-    eprintln!("\n🤔💡 a quick demonstration of the problem, using your snapshot...");
+    eprintln!("\n🤔💡 the problem can be illustrated with two questions (you are not required to answer correctly):");
 
     match quiz_group_id(groups, rng)? {
       None => eprintln!("{SKIP_QUIZ_MESSAGE}"),
@@ -279,7 +284,10 @@ fn quiz_group_id(groups: &[OktaGroupExpectation], rng: &mut impl Rng) -> Result<
 
       match Select::new(&prompt, examples.clone()).prompt_skippable()? {
         None => Ok(None),
-        Some(selected) if selected == *expected => Ok(Some(true)),
+        Some(selected) if selected == *expected => {
+          eprintln!("Correct! Did you look it up, was it a lucky guess, or did you actually know the answer?");
+          Ok(Some(true))
+        }
         Some(selected) => {
           let id = style(selected).red();
           let name = style(QuizItemGroupName(selected.0)).red();
@@ -305,14 +313,17 @@ fn quiz_group_name(groups: &[OktaGroupExpectation], rng: &mut impl Rng) -> Resul
 
   match examples.choose(rng) {
     Some(expected) => {
-      let prompt = format!("😏 Which group has ID '{}'?", expected.0.profile_name.as_str());
+      let prompt = format!("😏 Which group has ID '{}'?", expected.0.id.as_str());
 
       match Select::new(&prompt, examples.clone()).prompt_skippable()? {
         None => Ok(None),
-        Some(selected) if selected == *expected => Ok(Some(true)),
+        Some(selected) if selected == *expected => {
+          eprintln!("Correct! Did you look it up, was it a lucky guess, or did you actually know the answer?");
+          Ok(Some(true))
+        }
         Some(selected) => {
-          let id = style(selected).red();
-          let name = style(QuizItemGroupName(selected.0)).red();
+          let id = style(QuizItemGroupId(selected.0)).red();
+          let name = style(selected).red();
           let answer = style(expected).green();
 
           eprintln!("'{name}' has ID '{id}'... '{answer}' was the correct answer.");

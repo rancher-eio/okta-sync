@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- (FIX) fixed interactive prompts in mapping subcommand.
+
 ## 0.2.0
 
 - (BREAKING/LIB) new `Error` variant: `Error::Inquire`.
