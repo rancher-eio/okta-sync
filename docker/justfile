@@ -1,0 +1,54 @@
+#! /usr/bin/env -S just -f
+
+SOURCE_BUILD_IMAGE := env_var_or_default("SOURCE_BUILD_IMAGE", `yq 'explode(.).source.build.image' config.yaml`)
+SOURCE_BUILD_TAG := env_var_or_default("SOURCE_BUILD_TAG", `yq 'explode(.).source.build.tag' config.yaml`)
+SOURCE_GIT_IMAGE := env_var_or_default("SOURCE_GIT_IMAGE", `yq 'explode(.).source.git.image' config.yaml`)
+SOURCE_GIT_TAG := env_var_or_default("SOURCE_GIT_TAG", `yq 'explode(.).source.git.tag' config.yaml`)
+SOURCE_RUNTIME_IMAGE := env_var_or_default("SOURCE_RUNTIME_IMAGE", `yq 'explode(.).source.runtime.image' config.yaml`)
+SOURCE_RUNTIME_TAG := env_var_or_default("SOURCE_RUNTIME_TAG", `yq 'explode(.).source.runtime.tag' config.yaml`)
+SOURCE_UPSTREAM_REPOSITORY := env_var_or_default("SOURCE_UPSTREAM_REPOSITORY", `yq 'explode(.).source.upstream.repository' config.yaml`)
+SOURCE_UPSTREAM_TAG := env_var_or_default("SOURCE_UPSTREAM_TAG", `yq 'explode(.).source.upstream.tag' config.yaml`)
+TARGET_IMAGE := env_var_or_default("TARGET_IMAGE", `yq 'explode(.).target.image' config.yaml`)
+TARGET_TAG := env_var_or_default("TARGET_TAG", `yq 'explode(.).target.tag' config.yaml`)
+
+TARGET := TARGET_IMAGE + ":" + TARGET_TAG + "--bci-micro-" + SOURCE_RUNTIME_TAG + "--rust-" + SOURCE_BUILD_TAG + "--git-" + SOURCE_GIT_TAG
+
+_default: manifest-push
+
+build-all: (build "arm64") (build "amd64")
+
+@build architecture:
+  docker buildx build \
+    --platform="linux/{{ architecture }}" \
+    --build-arg SOURCE_BUILD_IMAGE="{{ SOURCE_BUILD_IMAGE }}" \
+    --build-arg SOURCE_BUILD_TAG="{{ SOURCE_BUILD_TAG }}" \
+    --build-arg SOURCE_GIT_IMAGE="{{ SOURCE_GIT_IMAGE }}" \
+    --build-arg SOURCE_GIT_TAG="{{ SOURCE_GIT_TAG }}" \
+    --build-arg SOURCE_RUNTIME_IMAGE="{{ SOURCE_RUNTIME_IMAGE }}" \
+    --build-arg SOURCE_RUNTIME_TAG="{{ SOURCE_RUNTIME_TAG }}" \
+    --build-arg SOURCE_UPSTREAM_REPOSITORY="{{ SOURCE_UPSTREAM_REPOSITORY }}" \
+    --build-arg SOURCE_UPSTREAM_TAG="{{ SOURCE_UPSTREAM_TAG }}" \
+    --tag="{{ TARGET }}-{{ architecture }}" \
+    .
+
+push-all: (push "arm64") (push "amd64")
+
+@push architecture: (build architecture)
+  docker push "{{ TARGET }}-{{ architecture }}"
+
+@manifest-create: build-all
+  docker manifest create {{ TARGET }} \
+    --amend {{ TARGET }}-arm64 \
+    --amend {{ TARGET }}-amd64
+
+@manifest-push: push-all manifest-create
+  docker manifest push {{ TARGET }}
+
+@manifest-finalize:
+  docker manifest create {{ TARGET_IMAGE }}:{{ TARGET_TAG }} \
+    --amend {{ TARGET }}-arm64 \
+    --amend {{ TARGET }}-amd64
+  docker manifest push {{ TARGET_IMAGE }}:{{ TARGET_TAG }}
+
+run architecture="arm64":
+  docker run --rm --interactive --tty "{{ TARGET }}-{{ architecture }}" --help
