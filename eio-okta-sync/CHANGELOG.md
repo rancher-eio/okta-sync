@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- (FEATURE) new command "make-archive" produces a filesystem tarball from a generated resources input.
+- (FEATURE) mappings subcommand has a description now
+- (DEPENDENCY/NEW) added tar
+
 ## 0.2.1
 
 - (FIX) fixed interactive prompts in mapping subcommand.

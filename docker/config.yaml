@@ -11,7 +11,7 @@ source: &source
     tag: 15.6.24.2  # {"$imagepolicy": "registry:bci-micro--release:tag"}
   upstream: &upstream
     repository: github.com/rancher-eio/okta-sync
-    tag: 0.2.1
+    tag: 0.3.0
 target:
   !!merge <<: *upstream
   image: docker.io/rancherlabs/eio-okta-sync

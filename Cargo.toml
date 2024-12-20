@@ -51,6 +51,7 @@ serde_json = { version = "1.0.132", default-features = false }
 serde_qs = { version = "0.13.0", default-features = false }
 struct-patch = { version = "^0.8, >= 0.8.6" }
 strum = { version = "0.26.3" }
+tar = { version = "0.4.43", default-features = false }
 tokio = { version = "1.41.0", default-features = false }
 update-informer = { version = "1.1.0", default-features = false }
 ureq = { version = "2.10.1", default-features = false }

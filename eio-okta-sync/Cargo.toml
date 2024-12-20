@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-sync"
-version = "0.2.1"
+version = "0.3.0"
 description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
 rust-version.workspace = true
 edition.workspace = true
@@ -17,11 +17,12 @@ eio-okta-data.workspace = true
 
 constcat.workspace = true
 fs-err.workspace = true
+heck.workspace = true
 humantime.workspace = true
 remain.workspace = true
 serde_yml.workspace = true
+tar.workspace = true
 thiserror.workspace = true
-heck.workspace = true
 
 camino = { workspace = true, features = ["serde1"] }
 clap = { workspace = true, features = [

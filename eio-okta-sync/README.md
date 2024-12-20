@@ -165,6 +165,12 @@ eio-okta-sync current --org rancher
 [OK] resources saved to current.yaml
 ```
 
+#### Create an archive from a resources file
+
+```fish
+eio-okta-sync make-archive --org rancher
+```
+
 ## License
 
 ```text

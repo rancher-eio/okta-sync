@@ -15,6 +15,7 @@ use crate::okta::Snapshot;
 #[derive(Debug, Clone, clap::Args)]
 #[remain::sorted]
 #[rustfmt::skip]
+#[command(about = "interactively create a mapping config")]
 pub struct Command {
   #[arg(
     long,
