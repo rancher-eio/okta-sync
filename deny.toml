@@ -113,9 +113,10 @@ exceptions = [
   # Each entry is the crate and version constraint, and its specific allow
   # list
   { allow = ["OpenSSL"], crate = "ring" },
+  { allow = ["MPL-2.0"], crate = "base64urlsafedata" },
+  { allow = ["MPL-2.0"], crate = "option-ext" },
   { allow = ["MPL-2.0"], crate = "scim_proto" },
   { allow = ["MPL-2.0"], crate = "webpki-roots" },
-  { allow = ["MPL-2.0"], crate = "base64urlsafedata" },
 ]
 
 # Some crates don't have (easily) machine readable licensing information,
@@ -238,7 +239,6 @@ allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 # List of URLs for allowed Git repositories
 allow-git = [
   "https://github.com/jwiegley/comparable.git?rev=refs%2Fpull%2F5%2Fhead",
-  "https://github.com/kanidm/kanidm.git?rev=refs%2Fpull%2F3036%2Fhead",
   "https://github.com/proptest-rs/proptest.git?rev=refs%2Fpull%2F530%2Fhead",
 ]
 

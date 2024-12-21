@@ -7,12 +7,16 @@ use iri_string::types::UriAbsoluteString;
 use serde::{Deserialize, Serialize};
 use std::io::Read;
 
+use super::generate::EmbedGithubOrgName;
+
 #[derive(Debug, Parser)]
 #[remain::sorted]
 #[rustfmt::skip]
 #[command(about = "generate resources from current github users")]
 #[group(skip)]
 pub struct Command {
+  #[command(flatten)]
+  embed_github_org_name: EmbedGithubOrgName,
   #[arg(
     long,
     value_name    = "PATH",
@@ -120,7 +124,12 @@ enum MemberType {
 impl Command {
   #[remain::check]
   pub fn run(self) -> Result<(), crate::Error> {
-    let Self { members, org, output } = self;
+    let Self {
+      embed_github_org_name: embedding,
+      members,
+      org,
+      output,
+    } = self;
 
     let members: Vec<OrgMembership> = {
       let mut buf = Vec::new();
@@ -132,15 +141,20 @@ impl Command {
     let mut resources = Vec::with_capacity(members.len());
     for member in members {
       let username = member.login.to_lowercase();
+
+      let mut metadata = kubernetes::ObjectMeta {
+        name: username.clone(),
+        namespace: None,
+        annotations: None,
+        labels: None,
+      };
+
+      embedding.embed(org.clone(), &mut metadata);
+
       let resource = kubernetes::Resource {
         api_version: String::from(github::Membership::API_GROUP_VERSION),
         kind: String::from(github::Membership::KIND),
-        metadata: kubernetes::ObjectMeta {
-          name: format!("{org}--{username}"),
-          namespace: None,
-          annotations: None,
-          labels: None,
-        },
+        metadata,
         spec: crossplane::ManagedResource {
           deletion_policy: Some(crossplane::DeletionPolicy::Delete),
           provider_config_ref: crossplane::ProviderConfigReference {

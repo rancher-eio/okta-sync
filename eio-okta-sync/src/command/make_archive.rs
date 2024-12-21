@@ -7,14 +7,18 @@ use tar::{Builder, Header};
 use crate::{
   crossplane::ManagedResource,
   github::{Membership, Team, TeamMembership},
-  kubernetes::{ObjectMeta, Resource},
+  kubernetes::Resource,
 };
+
+use super::generate::EmbedGithubOrgName;
 
 #[derive(Debug, Clone, clap::Args)]
 #[remain::sorted]
 #[rustfmt::skip]
 #[command(about = "create an archive from generated resources")]
 pub struct Command {
+  #[command(flatten)]
+  embed_github_org_name: EmbedGithubOrgName,
   #[arg(
     long,
     value_name    = "KIND",
@@ -47,6 +51,15 @@ This is assumed to be a prefix of the $.metadata.name for each resource, and wil
     help         = "file to read resources from",
   )]
   resources: Utf8PathBuf,
+  #[arg(
+    long,
+    value_name    = "BOOL",
+    default_value = "true",
+    action = clap::ArgAction::Set,
+    help_heading = "Output Options",
+    help         = "strip namespaces from resources",
+  )]
+  strip_namespaces: bool,
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -69,35 +82,41 @@ impl AsRef<str> for Kind {
   }
 }
 
+/// u+rw,g+r,o+r
+const DEFAULT_MODE: u32 = 0o644;
+
 impl Command {
   pub fn run(self) -> Result<(), crate::Error> {
     let Self {
+      embed_github_org_name: embedded,
       kind: target,
       org,
       output: output_path,
       resources: resources_path,
+      strip_namespaces,
     } = self;
 
-    let prefix = format!("{org}--");
-
     let resources_yaml = fs_err::read_to_string(&resources_path)?;
-    let resources: Vec<Resource<ManagedResource<Value>>> = serde_yml::from_str(&resources_yaml)?;
+    let mut resources: Vec<Resource<ManagedResource<Value>>> = serde_yml::from_str(&resources_yaml)?;
 
     let mut archive = Builder::new(Cursor::new(Vec::new()));
 
-    for resource in resources.iter() {
-      let Resource {
-        kind,
-        metadata: ObjectMeta { name, .. },
-        ..
-      } = resource;
-      if kind.eq(target.as_ref()) {
-        if let Some(name) = name.strip_prefix(&prefix) {
-          let path = Utf8PathBuf::from(format!("manifests/resources/{kind}/{name}.yaml"));
-          let mut header = Header::new_gnu();
-          let mut entry = archive.append_writer(&mut header, path)?;
-          serde_yml::to_writer(&mut entry, &resource)?;
-          entry.finish()?;
+    for resource in resources.iter_mut() {
+      let Resource { kind, metadata, .. } = resource;
+      if kind.as_str().eq(target.as_ref()) {
+        if let Some(org_name) = embedded.org(metadata) {
+          if org == org_name {
+            if strip_namespaces {
+              metadata.namespace = None;
+            }
+            let name = embedded.name(metadata);
+            let path = Utf8PathBuf::from(format!("manifests/resources/{kind}/{name}.yaml"));
+            let mut header = Header::new_gnu();
+            header.set_mode(DEFAULT_MODE);
+            let mut entry = archive.append_writer(&mut header, path)?;
+            serde_yml::to_writer(&mut entry, &resource)?;
+            entry.finish()?;
+          }
         }
       }
     }
@@ -106,7 +125,9 @@ impl Command {
 
     let contents = archive.into_inner()?.into_inner();
 
-    fs_err::write(output_path, &contents)?;
+    fs_err::write(&output_path, &contents)?;
+
+    eprintln!("\n[OK] resources saved to {output_path}");
 
     Ok(())
   }

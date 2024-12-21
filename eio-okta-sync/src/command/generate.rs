@@ -11,6 +11,8 @@ use std::io::Read;
 #[rustfmt::skip]
 #[command(about = "generate GitHub resources from Okta snapshot")]
 pub struct Command {
+  #[command(flatten)]
+  embed_github_org_name: EmbedGithubOrgName,
   #[arg(
     long,
     value_name    = "PATH",
@@ -52,6 +54,144 @@ orgs:                      ########## orgs to create resources for
     help          = "file to read Okta snapshot from"
   )]
   snapshot: Utf8PathBuf,
+}
+
+const DEFAULT_ORG_ANNOTATION: &str = "eio.rancher.engineering/github-org-name";
+const DEFAULT_ORG_LABEL: &str = "eio.rancher.engineering/github-org-name";
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, clap::Args)]
+#[group(id = "embed.github.org.name")]
+#[remain::sorted]
+#[rustfmt::skip]
+pub struct EmbedGithubOrgName {
+  #[arg(
+    env  = "EMBED_GITHUB_ORG_NAME_ANNOTATION",
+    long = "embed-github-org-name-annotation",
+    id   = "embed.github.org.name.annotation",
+    value_name    = "KEY",
+    default_value = DEFAULT_ORG_ANNOTATION,
+    help_heading = "Embedding Options (GitHub Org Name)",
+    help         = "annotation to use when --embed-github-org-name='annotation'"
+  )]
+  pub(crate) annotation: String,
+  #[arg(
+    env  = "EMBED_GITHUB_ORG_NAME_DELIMITER",
+    long = "embed-github-org-name-delimiter",
+    id   = "embed.github.org.name.delimiter",
+    value_name    = "DELIMITER",
+    default_value = "--",
+    help_heading = "Embedding Options (GitHub Org Name)",
+    help         = "delimiter to use when --embed-github-org-name='name-prefix'"
+  )]
+  pub(crate) delimiter: String,
+  #[arg(
+    env  = "EMBED_GITHUB_ORG_NAME_LABEL",
+    long = "embed-github-org-name-label",
+    id   = "embed.github.org.name.label",
+    value_name    = "KEY",
+    default_value = DEFAULT_ORG_LABEL,
+    help_heading = "Embedding Options (GitHub Org Name)",
+    help         = "label to use when --embed-github-org-name='label'"
+  )]
+  pub(crate) label: String,
+  #[arg(
+    env  = "EMBED_GITHUB_ORG_NAME",
+    long = "embed-github-org-name",
+    id   = "embed.github.org.name.target",
+    value_name    = "TARGET",
+    default_value = "name-prefix",
+    help_heading = "Embedding Options (GitHub Org Name)",
+    help         = "where to embed github org name",
+    long_help    = "where to embed github org name.
+
+- annotation  = embeds in $.metadata.annotation[EMBED_GITHUB_ORG_NAME_ANNOTATION]
+- label       = embeds in $.metadata.label[EMBED_GITHUB_ORG_NAME_LABEL]
+- name-prefix = embeds as prefix to $.metadata.name with EMBED_GITHUB_ORG_NAME_DELIMITER
+- namespace   = embeds as $.metadata.namespace (regardless of if resources is namespaced)
+- none        = does not embed anywhere"
+  )]
+  pub(crate) target: EmbedTarget,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, clap::ValueEnum)]
+#[clap(rename_all = "kebab-case")]
+#[remain::sorted]
+pub(crate) enum EmbedTarget {
+  Annotation,
+  Label,
+  NamePrefix,
+  Namespace,
+  None,
+}
+
+impl EmbedGithubOrgName {
+  pub(crate) fn embed(&self, org_name: String, metadata: &mut kubernetes::ObjectMeta) {
+    let Self {
+      annotation,
+      delimiter,
+      label,
+      target,
+    } = self;
+
+    match target {
+      EmbedTarget::Annotation => {
+        metadata
+          .annotations
+          .get_or_insert_default()
+          .insert(annotation.to_owned(), org_name);
+      }
+      EmbedTarget::Label => {
+        metadata
+          .labels
+          .get_or_insert_default()
+          .insert(label.to_owned(), org_name);
+      }
+      EmbedTarget::NamePrefix => metadata.name.insert_str(0, &format!("{org_name}{delimiter}")),
+      EmbedTarget::Namespace => {
+        metadata.namespace = Some(org_name);
+      }
+      EmbedTarget::None => (),
+    };
+  }
+
+  pub(crate) fn org<'metadata>(&self, metadata: &'metadata kubernetes::ObjectMeta) -> Option<&'metadata str> {
+    let Self {
+      annotation,
+      delimiter,
+      label,
+      target,
+    } = self;
+
+    match target {
+      EmbedTarget::Annotation => metadata
+        .annotations
+        .as_ref()
+        .and_then(|annotations| annotations.get(annotation))
+        .map(AsRef::as_ref),
+      EmbedTarget::Label => metadata
+        .labels
+        .as_ref()
+        .and_then(|labels| labels.get(label))
+        .map(AsRef::as_ref),
+      EmbedTarget::NamePrefix => metadata.name.split_once(delimiter).map(|(org_name, _)| org_name),
+      EmbedTarget::Namespace => metadata.namespace.as_ref().map(AsRef::as_ref),
+      EmbedTarget::None => None,
+    }
+  }
+
+  pub(crate) fn name<'metadata>(&self, metadata: &'metadata kubernetes::ObjectMeta) -> &'metadata str {
+    let Self { delimiter, target, .. } = self;
+
+    if let EmbedTarget::NamePrefix = target {
+      metadata
+        .name
+        .split_once(delimiter)
+        .map(|(_, name)| name)
+        .unwrap_or_else(|| metadata.name.as_ref())
+    } else {
+      metadata.name.as_ref()
+    }
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -121,6 +261,7 @@ const LABEL_OKTA_USER_ID: &str = "suse.okta.com/user-id";
 impl Command {
   pub fn run(&self) -> Result<(), crate::Error> {
     let Self {
+      embed_github_org_name: embedding,
       mappings,
       output,
       snapshot,
@@ -197,15 +338,19 @@ impl Command {
                   labels
                 };
 
+                let mut metadata = kubernetes::ObjectMeta {
+                  name: username.clone(),
+                  namespace: None,
+                  annotations: None,
+                  labels: Some(labels),
+                };
+
+                embedding.embed(org_name.to_owned(), &mut metadata);
+
                 let resource = kubernetes::Resource {
                   api_version: String::from(github::Membership::API_GROUP_VERSION),
                   kind: String::from(github::Membership::KIND),
-                  metadata: kubernetes::ObjectMeta {
-                    name: format!("{org_name}--{username}"),
-                    namespace: None,
-                    annotations: None,
-                    labels: Some(labels),
-                  },
+                  metadata,
                   spec: crossplane::ManagedResource {
                     deletion_policy: Some(crossplane::DeletionPolicy::Delete),
                     provider_config_ref: crossplane::ProviderConfigReference {

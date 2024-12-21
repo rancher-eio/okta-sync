@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- (BUGFIX) "make-archive" now produces tarballs with modes that allow reading!
+- (FEATURE) "make-archive", "generate", and "current" all support multiple ways to embed and consume GitHub Org names in resources, rather than forcing it as a name prefix.
+
 ## 0.3.0
 
 - (FEATURE) new command "make-archive" produces a filesystem tarball from a generated resources input.
@@ -37,6 +42,7 @@
 
 | Tag                | Description
 |--------------------|------------
+| BUGFIX             | something was wrong before, and now it isn't.
 | DEPENDENCY/ADD     | added a dependency to this crate that is already used in the project.
 | DEPENDENCY/NEW     | added a dependency to the project.
 | INTERNAL           | noted for reference, but does not affect public interfaces.
