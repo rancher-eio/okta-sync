@@ -1,7 +1,13 @@
 # Changelog
 
-## 0.3.1
+## 0.3.2
 
+- (BREAKING/BUILD) Minimum Supported Rust Version increased from 1.81 to 1.83
+  - (BREAKING/MIGRATION) upgrade your rust toolchain
+
+## 0.3.1 (yanked)
+
+- (YANKED) MSRV is incorrect.
 - (BUGFIX) "make-archive" now produces tarballs with modes that allow reading!
 - (FEATURE) "make-archive", "generate", and "current" all support multiple ways to embed and consume GitHub Org names in resources, rather than forcing it as a name prefix.
 
@@ -47,7 +53,9 @@
 | DEPENDENCY/NEW     | added a dependency to the project.
 | INTERNAL           | noted for reference, but does not affect public interfaces.
 | LIB                | changes something about the library in a backwards-compatible way.
+| BREAKING/BUILD     | changes something about the build and requires changes.
 | BREAKING/LIB       | changes something about the library and requires changes.
 | BREAKING/MIGRATION | generally paired with a BREAKING change, this is what to do about it.
 | FEATURE            | adds a feature.
 | LICENSE            | change relating to licensing.
+| YANKED             | version was published, then un-published.

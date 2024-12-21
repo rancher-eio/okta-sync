@@ -3,7 +3,7 @@ resolver = "2"
 members = ["eio-okta-sync", "eio-okta-api", "eio-okta-client", "eio-okta-data"]
 
 [workspace.package]
-rust-version = "1.81"
+rust-version = "1.83"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/rancher-eio/okta-sync"
