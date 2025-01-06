@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-api"
-version = "0.2.0"
+version = "0.2.1"
 description = "API Types for Okta"
 rust-version.workspace = true
 edition.workspace = true

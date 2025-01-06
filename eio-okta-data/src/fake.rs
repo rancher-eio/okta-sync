@@ -111,7 +111,7 @@ pub(crate) mod address {
 
   mod raw {
     pub(crate) use ::fake::faker::address::raw::*;
-    use ::fake::{locales::Data, Dummy, Fake};
+    use ::fake::{faker::impls::address::CityNameGenFn, locales::Data, Dummy, Fake};
     use ::rand::Rng;
 
     pub(crate) struct StreetAddress<L>(pub L);
@@ -134,7 +134,7 @@ pub(crate) mod address {
       const TEMPLATE: &'static str = "{StreetAddress} {CityName} {StateName} {PostCode} {CountryName}";
     }
 
-    impl<L: Data + Copy> Dummy<PostalAddress<L>> for String {
+    impl<L: Data + Copy + CityNameGenFn> Dummy<PostalAddress<L>> for String {
       fn dummy_with_rng<R: Rng + ?Sized>(c: &PostalAddress<L>, rng: &mut R) -> Self {
         PostalAddress::<L>::TEMPLATE
           .replace("{StreetAddress}", StreetAddress(c.0).fake_with_rng::<String, _>(rng).as_str())
@@ -313,8 +313,8 @@ pub(crate) mod phone_number {
 
 pub(crate) mod locales {
   use ::constcat::concat_slices;
-  use ::fake::locales::Data;
   pub(crate) use ::fake::locales::{AR_SA, FR_FR, JA_JP, PT_BR, ZH_CN, ZH_TW};
+  use ::fake::{faker::impls::address::CityNameGenFn, locales::Data};
 
   #[derive(Clone, Copy)]
   pub(crate) struct EN;
@@ -325,6 +325,8 @@ pub(crate) mod locales {
 
   #[derive(Clone, Copy)]
   pub(crate) struct Custom;
+
+  impl CityNameGenFn for Custom {}
 
   impl Data for Custom {
     const ADDRESS_CITY_TPL: &'static str = "{CityName}{CitySuffix}";

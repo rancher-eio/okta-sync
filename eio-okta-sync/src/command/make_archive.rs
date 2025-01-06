@@ -1,4 +1,4 @@
-use std::io::Cursor;
+use std::io::{Cursor, Write};
 
 use camino::Utf8PathBuf;
 use serde_yml::Value;
@@ -21,15 +21,34 @@ pub struct Command {
   embed_github_org_name: EmbedGithubOrgName,
   #[arg(
     long,
+    value_name    = "BOOL",
+    default_value = "false",
+    action        = clap::ArgAction::Set,
+    help_heading = "Output Options",
+    help         = "append YAML end-of-document marker ('...')",
+  )]
+  force_yaml_end_of_document: bool,
+  #[arg(
+    long,
     value_name    = "KIND",
     default_value = Membership::KIND,
+    help_heading = "Input Options",
     help = "which kind of resources to collect in the archive",
   )]
+  #[arg(
+    long,
+    value_name    = "BOOL",
+    default_value = "true",
+    action        = clap::ArgAction::Set,
+    help_heading = "Output Options",
+    help         = "append YAML start-of-document marker ('---')",
+  )]
+  force_yaml_start_of_document: bool,
   kind: Kind,
   #[arg(
     long,
     value_name = "ORG",
-    help = "GitHub Org to read from",
+    help      = "GitHub Org to read from",
     long_help = "GitHub Org to read from.
 
 This is assumed to be a prefix of the $.metadata.name for each resource, and will be stripped from the filename.",
@@ -84,6 +103,8 @@ impl AsRef<str> for Kind {
 
 /// u+rw,g+r,o+r
 const DEFAULT_MODE: u32 = 0o644;
+const YAML_END_OF_DOCUMENT: &str = "...\n";
+const YAML_START_OF_DOCUMENT: &str = "---\n";
 
 impl Command {
   pub fn run(self) -> Result<(), crate::Error> {
@@ -94,6 +115,8 @@ impl Command {
       output: output_path,
       resources: resources_path,
       strip_namespaces,
+      force_yaml_end_of_document,
+      force_yaml_start_of_document,
     } = self;
 
     let resources_yaml = fs_err::read_to_string(&resources_path)?;
@@ -114,7 +137,13 @@ impl Command {
             let mut header = Header::new_gnu();
             header.set_mode(DEFAULT_MODE);
             let mut entry = archive.append_writer(&mut header, path)?;
+            if force_yaml_start_of_document {
+              entry.write_all(YAML_START_OF_DOCUMENT.as_bytes())?;
+            }
             serde_yml::to_writer(&mut entry, &resource)?;
+            if force_yaml_end_of_document {
+              entry.write_all(YAML_END_OF_DOCUMENT.as_bytes())?;
+            }
             entry.finish()?;
           }
         }

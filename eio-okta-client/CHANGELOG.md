@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- (DEPENDENCY) eio-okta-api 0.2.0 -> 0.2.1
+
 ## 0.2.0
 
 - (CLI) now with actually descriptive help text!

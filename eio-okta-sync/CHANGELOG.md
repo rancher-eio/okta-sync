@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- (FEATURE) added --force-yaml-start-of-document and --force-yaml-end-of-document options to "make-archive" command.
+  - these options can be used to force the YAML output to include explicit start/end markers.
+
 ## 0.3.2
 
 - (BREAKING/BUILD) Minimum Supported Rust Version increased from 1.81 to 1.83

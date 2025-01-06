@@ -2,16 +2,16 @@
 source: &source
   build: &build
     image: registry.suse.com/bci/rust  # {"$imagepolicy": "registry:bci-rust:name"}
-    tag: 1.82.0-1.3.8  # {"$imagepolicy": "registry:bci-rust:tag"}
+    tag: 1.82.0-1.4.2  # {"$imagepolicy": "registry:bci-rust:tag"}
   git: &git
     image: registry.suse.com/suse/git  # {"$imagepolicy": "registry:suse-git:name"}
-    tag: 2.43.0-34.6  # {"$imagepolicy": "registry:suse-git:tag"}
+    tag: 2.43.0-35.3  # {"$imagepolicy": "registry:suse-git:tag"}
   runtime: &runtime
     image: registry.suse.com/bci/bci-micro  # {"$imagepolicy": "registry:bci-micro--release:name"}
-    tag: 15.6.28.4  # {"$imagepolicy": "registry:bci-micro--release:tag"}
+    tag: 15.6.29.1  # {"$imagepolicy": "registry:bci-micro--release:tag"}
   upstream: &upstream
     repository: github.com/rancher-eio/okta-sync
-    tag: 0.3.2
+    tag: 0.4.0
 target:
   !!merge <<: *upstream
   image: docker.io/rancherlabs/eio-okta-sync
