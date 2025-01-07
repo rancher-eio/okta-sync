@@ -30,13 +30,6 @@ pub struct Command {
   force_yaml_end_of_document: bool,
   #[arg(
     long,
-    value_name    = "KIND",
-    default_value = Membership::KIND,
-    help_heading = "Input Options",
-    help = "which kind of resources to collect in the archive",
-  )]
-  #[arg(
-    long,
     value_name    = "BOOL",
     default_value = "true",
     action        = clap::ArgAction::Set,
@@ -44,6 +37,13 @@ pub struct Command {
     help         = "append YAML start-of-document marker ('---')",
   )]
   force_yaml_start_of_document: bool,
+  #[arg(
+    long,
+    value_name    = "KIND",
+    default_value = Membership::KIND,
+    help_heading = "Input Options",
+    help = "which kind of resources to collect in the archive",
+  )]
   kind: Kind,
   #[arg(
     long,

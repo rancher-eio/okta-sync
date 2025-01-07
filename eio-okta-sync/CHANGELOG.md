@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.4.0
+## 0.4.1
+
+- (BUGFIX) fix --kind option for "make-archive" command
+
+## 0.4.0 (yanked)
 
 - (FEATURE) added --force-yaml-start-of-document and --force-yaml-end-of-document options to "make-archive" command.
   - these options can be used to force the YAML output to include explicit start/end markers.
