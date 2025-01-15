@@ -11,6 +11,24 @@ use std::io::Read;
 #[rustfmt::skip]
 #[command(about = "generate GitHub resources from Okta snapshot")]
 pub struct Command {
+  #[arg(
+    long,
+    value_name            = "BOOL",
+    default_value         = "false",
+    action                = clap::ArgAction::Set,
+    num_args              = 0..=1,
+    default_missing_value = "true",
+    help      = "include all users?",
+    long_help = "include all users?
+
+If true, users are sourced from '$.users' in the snapshot.
+  This was the default prior to v0.5.x
+
+If false, users are sourced from '$.group_users[*]' in the snapshot,
+  where '*' is '$.expectations.oktaGroups[].id' in the mapping config.
+"
+  )]
+  all_users: bool,
   #[command(flatten)]
   embed_github_org_name: EmbedGithubOrgName,
   #[arg(
@@ -261,6 +279,7 @@ const LABEL_OKTA_USER_ID: &str = "suse.okta.com/user-id";
 impl Command {
   pub fn run(&self) -> Result<(), crate::Error> {
     let Self {
+      all_users,
       embed_github_org_name: embedding,
       mappings,
       output,
@@ -308,7 +327,19 @@ impl Command {
 
     let mut org_memberships = Vec::with_capacity(snapshot.users.len());
 
-    for user in snapshot.users {
+    let mut users = Vec::new();
+
+    if *all_users {
+      users.extend(&snapshot.users);
+    } else {
+      for OktaGroupExpectation { id: group_id, .. } in &mappings.expectations.okta_groups {
+        if let Some(group_users) = snapshot.group_users.get(group_id) {
+          users.extend(group_users);
+        }
+      }
+    }
+
+    for user in users {
       if !user.status.is_active() {
         eprintln!("Skipping {} User: {}", &user.status, &user.profile.email);
         continue;

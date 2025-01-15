@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- (FEATURE) added --all-users option to "generate" command.
+- (BREAKING/COMMAND) - "generate" now sources users from `$.group_users[*]` in snapshot, where `*` is `$.expectations.oktaGroup[].id` in the mapping config.
+  - (BREAKING/MITIGATION) - set --all-users=true to read from `$.users` in snapshot, as was the default behaviour in prior versions.
+
 ## 0.4.1
 
 - (BUGFIX) fix --kind option for "make-archive" command
@@ -63,6 +69,7 @@
 | INTERNAL           | noted for reference, but does not affect public interfaces.
 | LIB                | changes something about the library in a backwards-compatible way.
 | BREAKING/BUILD     | changes something about the build and requires changes.
+| BREAKING/COMMAND   | changes something about the a command's default behaviour.
 | BREAKING/LIB       | changes something about the library and requires changes.
 | BREAKING/MIGRATION | generally paired with a BREAKING change, this is what to do about it.
 | FEATURE            | adds a feature.
