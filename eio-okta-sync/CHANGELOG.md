@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.1
+
+- (FEATURE) added --valid-github-username option to "generate" command.
+- (FEATURE) added ignoredUsers field to mappings config.
+- (FEATURE) added support for generating ignoredUsers to "mappings" command.
+- (LIB) new `Error` variant: `Error::FancyRegex`.
+- (INTERNAL) Mappings and Expectations now implement Default.
+- (DEPENDENCY/ADD) using educe in eio-okta-sync
+- (DEPENDENCY/NEW) added fancy-regex
+
 ## 0.5.0
 
 - (FEATURE) added --all-users option to "generate" command.

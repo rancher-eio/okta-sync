@@ -2,11 +2,14 @@ use crate::crossplane::ProviderConfigReference;
 use crate::okta::Snapshot;
 use crate::{crossplane, github, kubernetes};
 use camino::Utf8PathBuf;
+use eio_okta_data::current::management::components::schemas::{User, UserProfile};
+use fancy_regex::Regex;
 use fs_err::File;
 use std::collections::{HashMap, HashSet};
 use std::io::Read;
 
-#[derive(Debug, Clone, PartialEq, Eq, clap::Args)]
+#[derive(educe::Educe, clap::Args)]
+#[educe(Debug, Clone, PartialEq, Eq)]
 #[remain::sorted]
 #[rustfmt::skip]
 #[command(about = "generate GitHub resources from Okta snapshot")]
@@ -72,8 +75,17 @@ orgs:                      ########## orgs to create resources for
     help          = "file to read Okta snapshot from"
   )]
   snapshot: Utf8PathBuf,
+  #[arg(
+    long,
+    value_name    = "REGEX",
+    default_value = DEFAULT_VALID_GITHUB_USERNAME_PATTERN,
+    help = "GitHub usernames must match this pattern",
+  )]
+  #[educe(PartialEq(ignore))]
+  valid_github_username: Regex,
 }
 
+const DEFAULT_VALID_GITHUB_USERNAME_PATTERN: &str = "^(?!.*--.*)[[:alnum:]][[:alnum:]-]{0,37}[[:alnum:]]$";
 const DEFAULT_ORG_ANNOTATION: &str = "eio.rancher.engineering/github-org-name";
 const DEFAULT_ORG_LABEL: &str = "eio.rancher.engineering/github-org-name";
 
@@ -212,19 +224,59 @@ impl EmbedGithubOrgName {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Mappings {
   pub(crate) expectations: Expectations,
+  pub(crate) ignored_users: IgnoredUsers,
   pub(crate) orgs: Vec<OrgMapping>,
   pub(crate) roles: Vec<RoleMapping>,
   pub(crate) teams: Vec<TeamMapping>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Expectations {
   pub(crate) okta_groups: Vec<OktaGroupExpectation>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct IgnoredUsers {
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) github_usernames: Vec<String>,
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) okta_profile_emails: Vec<String>,
+}
+
+impl IgnoredUsers {
+  pub(crate) fn contains(
+    &self,
+    User {
+      profile: UserProfile {
+        email, github_username, ..
+      },
+      ..
+    }: &User,
+  ) -> bool {
+    for ignored in &self.okta_profile_emails {
+      if email.eq_ignore_ascii_case(&ignored) {
+        return true;
+      }
+    }
+
+    if let Some(usernames) = github_username {
+      for username in usernames {
+        for ignored in &self.github_usernames {
+          if username.eq_ignore_ascii_case(&ignored) {
+            return true;
+          }
+        }
+      }
+    }
+
+    false
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -284,6 +336,7 @@ impl Command {
       mappings,
       output,
       snapshot,
+      valid_github_username,
     } = self;
 
     let mappings: Mappings = {
@@ -345,9 +398,23 @@ impl Command {
         continue;
       }
 
+      if mappings.ignored_users.contains(user) {
+        eprintln!("Actively Ignoring User: {}", &user.profile.email);
+        continue;
+      }
+
       if let Some(ref usernames) = user.profile.github_username {
         for username in usernames {
           let username = username.trim().to_lowercase();
+
+          if !valid_github_username.is_match(&username)? {
+            eprintln!(
+              "Skipping Invalid GitHub Username ('{}') for User: {}",
+              &username, &user.profile.email
+            );
+            continue;
+          }
+
           if let Some(ref orgs) = user.profile.github_orgs {
             for org in orgs {
               if let Some(org) = mappings

@@ -8,7 +8,9 @@ use inquire::{Confirm, MultiSelect, Select, Text};
 use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng, Rng};
 
-use crate::command::generate::{Expectations, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping};
+use crate::command::generate::{
+  Expectations, IgnoredUsers, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping,
+};
 use crate::github::membership::Role::Admin;
 use crate::okta::Snapshot;
 
@@ -41,16 +43,13 @@ impl Command {
     let yaml = fs_err::read_to_string(&snapshot)?;
     let snapshot: Snapshot = serde_yml::from_str(&yaml)?;
 
-    let expectations = expectations(&snapshot, interactive)?;
-    let roles = roles(&snapshot, interactive)?;
-    let teams = teams(&snapshot, interactive)?;
-    let orgs = orgs(&snapshot, interactive)?;
-
     let mappings = Mappings {
-      expectations,
-      orgs,
-      roles,
-      teams,
+      expectations: expectations(&snapshot, interactive)?,
+      ignored_users: ignored_users(&snapshot, interactive)?,
+      orgs: orgs(&snapshot, interactive)?,
+      roles: roles(&snapshot, interactive)?,
+      teams: teams(&snapshot, interactive)?,
+      ..Default::default()
     };
 
     let yaml = serde_yml::to_string(&mappings)?;
@@ -58,6 +57,57 @@ impl Command {
     println!("{yaml}");
 
     Ok(())
+  }
+}
+
+fn ignored_users(snapshot: &Snapshot, interactive: bool) -> Result<IgnoredUsers, crate::Error> {
+  if interactive
+    && Confirm::new("Do you want to ignore any users?")
+      .with_default(false)
+      .prompt()?
+  {
+    Ok(IgnoredUsers {
+      github_usernames: ignored_users_by_github_username(snapshot, interactive)?,
+      okta_profile_emails: ignored_users_by_okta_profile_email(snapshot, interactive)?,
+    })
+  } else {
+    Ok(IgnoredUsers::default())
+  }
+}
+
+fn ignored_users_by_github_username(snapshot: &Snapshot, interactive: bool) -> Result<Vec<String>, crate::Error> {
+  if interactive
+    && Confirm::new("Ignore users by GitHub Username?")
+      .with_default(false)
+      .prompt()?
+  {
+    Ok(
+      MultiSelect::new(
+        "Which GitHub Usernames should be ignored?",
+        snapshot.users.github_users().github_usernames(),
+      )
+      .prompt()?,
+    )
+  } else {
+    Ok(Vec::new())
+  }
+}
+
+fn ignored_users_by_okta_profile_email(snapshot: &Snapshot, interactive: bool) -> Result<Vec<String>, crate::Error> {
+  if interactive
+    && Confirm::new("Ignore users by Okta profile email?")
+      .with_default(false)
+      .prompt()?
+  {
+    Ok(
+      MultiSelect::new(
+        "Which user emails should be ignored?",
+        snapshot.users.github_users().user_emails(),
+      )
+      .prompt()?,
+    )
+  } else {
+    Ok(Vec::new())
   }
 }
 
@@ -381,6 +431,21 @@ impl GithubUsers for [User] {
         } if !usernames.is_empty() => true,
         _ => false,
       })
+      .collect()
+  }
+}
+
+trait GitHubUsernames {
+  fn github_usernames(&self) -> Vec<String>;
+}
+
+impl GitHubUsernames for [&User] {
+  fn github_usernames(&self) -> Vec<String> {
+    self
+      .into_iter()
+      .filter_map(|user| user.profile.github_username.as_ref())
+      .flatten()
+      .map(ToOwned::to_owned)
       .collect()
   }
 }

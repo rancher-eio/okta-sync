@@ -13,6 +13,7 @@ pub mod okta;
 #[non_exhaustive]
 pub enum Error {
   Client(#[from] eio_okta_client::Error),
+  FancyRegex(#[from] fancy_regex::Error),
   Inquire(#[from] inquire::error::InquireError),
   IO(#[from] std::io::Error),
   IriStringTemplate(#[from] iri_string::template::Error),
