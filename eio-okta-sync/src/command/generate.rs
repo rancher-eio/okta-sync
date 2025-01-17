@@ -33,6 +33,8 @@ If false, users are sourced from '$.group_users[*]' in the snapshot,
   )]
   all_users: bool,
   #[command(flatten)]
+  crossplane: CrossplaneOptions,
+  #[command(flatten)]
   embed_github_org_name: EmbedGithubOrgName,
   #[arg(
     long,
@@ -83,6 +85,26 @@ orgs:                      ########## orgs to create resources for
   )]
   #[educe(PartialEq(ignore))]
   valid_github_username: Regex,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, clap::Args)]
+#[group(id = "crossplane")]
+#[remain::sorted]
+#[rustfmt::skip]
+struct CrossplaneOptions {
+  #[arg(
+    long = "crossplane-spec-provider-config-ref-name",
+    env  = "CROSSPLANE_SPEC_PROVIDER_CONFIG_REF_NAME",
+    id   = "crossplane.spec.provider_config_ref.name",
+    value_name = "STRING",
+    hide_short_help = true,
+    help_heading    = "Crossplane Options",
+    help            = "name of ProviderConfig to reference",
+    long_help       = "name of ProviderConfig to reference.
+
+By default, the contextually-relevant org name from the mapping config will be used."
+  )]
+  provider_config_ref_name: Option<String>
 }
 
 const DEFAULT_VALID_GITHUB_USERNAME_PATTERN: &str = "^(?!.*--.*)[[:alnum:]][[:alnum:]-]{0,37}[[:alnum:]]$";
@@ -332,6 +354,7 @@ impl Command {
   pub fn run(&self) -> Result<(), crate::Error> {
     let Self {
       all_users,
+      crossplane,
       embed_github_org_name: embedding,
       mappings,
       output,
@@ -452,7 +475,11 @@ impl Command {
                   spec: crossplane::ManagedResource {
                     deletion_policy: Some(crossplane::DeletionPolicy::Delete),
                     provider_config_ref: crossplane::ProviderConfigReference {
-                      name: org_name.to_owned(),
+                      name: crossplane
+                        .provider_config_ref_name
+                        .as_ref()
+                        .unwrap_or_else(|| &org_name)
+                        .to_owned(),
                       policy: None,
                     },
                     for_provider: github::Membership {
@@ -501,15 +528,19 @@ impl Command {
                       labels
                     };
 
+                    let mut metadata = kubernetes::ObjectMeta {
+                      name: format!("{team_name}--{username}"),
+                      namespace: None,
+                      annotations: None,
+                      labels: Some(labels),
+                    };
+
+                    embedding.embed(org_name.to_owned(), &mut metadata);
+
                     let resource = kubernetes::Resource {
                       api_version: github::TeamMembership::API_GROUP_VERSION.into(),
                       kind: github::TeamMembership::KIND.into(),
-                      metadata: kubernetes::ObjectMeta {
-                        name: format!("{org_name}--{team_name}--{username}"),
-                        namespace: None,
-                        annotations: None,
-                        labels: Some(labels),
-                      },
+                      metadata,
                       spec: crossplane::ManagedResource {
                         for_provider: github::TeamMembership {
                           role: github::team_membership::Role::Member,
@@ -517,7 +548,12 @@ impl Command {
                           username: username.to_owned(),
                         },
                         provider_config_ref: crossplane::ProviderConfigReference {
-                          name: org_name.to_owned(),
+                          name: crossplane
+                            .provider_config_ref_name
+                            .as_ref()
+                            .map(String::as_str)
+                            .unwrap_or_else(|| org_name)
+                            .to_owned(),
                           policy: None,
                         },
                         deletion_policy: Some(crossplane::DeletionPolicy::Delete),
@@ -548,15 +584,19 @@ impl Command {
         labels
       };
 
+      let mut metadata = kubernetes::ObjectMeta {
+        name: team_name.clone(),
+        namespace: None,
+        annotations: None,
+        labels: Some(labels),
+      };
+
+      embedding.embed(org_name.clone(), &mut metadata);
+
       let resource = kubernetes::Resource {
         api_version: github::Team::API_GROUP_VERSION.into(),
         kind: github::Team::KIND.into(),
-        metadata: kubernetes::ObjectMeta {
-          name: format!("{org_name}--{team_name}"),
-          namespace: None,
-          annotations: None,
-          labels: Some(labels),
-        },
+        metadata,
         spec: crossplane::ManagedResource {
           deletion_policy: Some(crossplane::DeletionPolicy::Delete),
           for_provider: github::Team {
@@ -568,7 +608,11 @@ impl Command {
             privacy: github::team::Privacy::Closed,
           },
           provider_config_ref: ProviderConfigReference {
-            name: org_name,
+            name: crossplane
+              .provider_config_ref_name
+              .as_ref()
+              .unwrap_or_else(|| &org_name)
+              .to_owned(),
             policy: None,
           },
           init_provider: None,

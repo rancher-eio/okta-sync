@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.2
+
+- (FEATURE) generated Team and TeamMembership resources now support --embed-github-org-name.
+- (FEATURE) added option to override the crossplane provider config name.
+
 ## 0.5.1
 
 - (FEATURE) added --valid-github-username option to "generate" command.
