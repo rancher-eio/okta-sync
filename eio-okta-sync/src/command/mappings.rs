@@ -6,7 +6,7 @@ use eio_okta_data::current::management::components::schemas::{Group, GroupProfil
 use heck::ToKebabCase;
 use inquire::{Confirm, MultiSelect, Select, Text};
 use itertools::Itertools;
-use rand::{seq::SliceRandom, thread_rng, Rng};
+use rand::{rng, seq::IndexedRandom, Rng};
 
 use crate::command::generate::{
   Expectations, IgnoredUsers, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping,
@@ -235,7 +235,7 @@ fn expectations(snapshot: &Snapshot, interactive: bool) -> Result<Expectations, 
   eprintln!("Okta Group IDs are opaque, which is a recipe for misconfiguration.");
 
   if interactive {
-    let mut rng = thread_rng();
+    let mut rng = rng();
 
     if Confirm::new("Would you like a demonstration of the problem, using your snapshot data?")
       .with_default(true)

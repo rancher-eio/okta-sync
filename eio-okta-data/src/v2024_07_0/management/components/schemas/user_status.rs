@@ -8,6 +8,7 @@ pub enum UserStatus {
   LockedOut,
   PasswordExpired,
   Provisioned,
+  Recovery,
   Staged,
   Suspended,
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- (BREAKING BUGFIX) add missing `UserStatus` variant: `UserStatus::Recovery`.
+  - (BREAKING/MIGRATION) add another arm to any match statements that are matching on `UserStatus` variants.
+
 ## 0.2.1
 
 - (COMPATIBILITY) impl CityNameGenFn for fake::locales::Custom

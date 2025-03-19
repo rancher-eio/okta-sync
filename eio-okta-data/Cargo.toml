@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-data"
-version = "0.2.1"
+version = "0.3.0"
 description = "Data Types for Okta"
 rust-version.workspace = true
 edition.workspace = true
@@ -41,7 +41,7 @@ serde = [
   "comparable?/serde",
   "email_address/serde_support",
   "mediatype/serde",
-  "rand?/serde1",
+  "rand?/serde",
 ]
 strum = ["dep:strum"]
 validate = ["dep:validator"]

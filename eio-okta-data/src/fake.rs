@@ -191,7 +191,7 @@ pub(crate) mod locale {
 
   pub(crate) mod raw {
     use ::fake::{locales::Data, Dummy, Fake};
-    use ::rand::{seq::SliceRandom, Rng};
+    use ::rand::{seq::IndexedRandom, Rng};
 
     pub struct Language<L>(pub L);
 

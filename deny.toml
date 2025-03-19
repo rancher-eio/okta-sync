@@ -75,6 +75,7 @@ feature-depth = 1
 # output a note when they are encountered.
 ignore = [
   { id = "RUSTSEC-2024-0370" },
+  { id = "RUSTSEC-2024-0436" },
   #"RUSTSEC-0000-0000",
   #{ id = "RUSTSEC-0000-0000", reason = "you can specify a reason the advisory is ignored" },
   #"a-crate-that-is-yanked@0.1.1", # you can also ignore yanked crate versions if you wish
@@ -112,9 +113,7 @@ confidence-threshold = 0.8
 exceptions = [
   # Each entry is the crate and version constraint, and its specific allow
   # list
-  { allow = ["OpenSSL"], crate = "ring" },
   { allow = ["MPL-2.0"], crate = "base64urlsafedata" },
-  { allow = ["MPL-2.0"], crate = "option-ext" },
   { allow = ["MPL-2.0"], crate = "scim_proto" },
   { allow = ["MPL-2.0"], crate = "webpki-roots" },
 ]
@@ -239,7 +238,6 @@ allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 # List of URLs for allowed Git repositories
 allow-git = [
   "https://github.com/jwiegley/comparable.git?rev=refs%2Fpull%2F5%2Fhead",
-  "https://github.com/proptest-rs/proptest.git?rev=refs%2Fpull%2F530%2Fhead",
 ]
 
 [sources.allow-org]
