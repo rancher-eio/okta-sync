@@ -12,7 +12,7 @@ use crate::command::generate::{
   Expectations, IgnoredUsers, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping,
 };
 use crate::github::membership::Role::Admin;
-use crate::okta::Snapshot;
+use crate::okta::{Snapshot, UserProfileExtensions};
 
 #[derive(Debug, Clone, clap::Args)]
 #[remain::sorted]
@@ -49,7 +49,6 @@ impl Command {
       orgs: orgs(&snapshot, interactive)?,
       roles: roles(&snapshot, interactive)?,
       teams: teams(&snapshot, interactive)?,
-      ..Default::default()
     };
 
     let yaml = serde_yml::to_string(&mappings)?;
@@ -84,7 +83,7 @@ fn ignored_users_by_github_username(snapshot: &Snapshot, interactive: bool) -> R
     Ok(
       MultiSelect::new(
         "Which GitHub Usernames should be ignored?",
-        snapshot.users.github_users().github_usernames(),
+        snapshot.users.github_users()?.github_usernames()?,
       )
       .prompt()?,
     )
@@ -102,7 +101,7 @@ fn ignored_users_by_okta_profile_email(snapshot: &Snapshot, interactive: bool) -
     Ok(
       MultiSelect::new(
         "Which user emails should be ignored?",
-        snapshot.users.github_users().user_emails(),
+        snapshot.users.github_users()?.user_emails(),
       )
       .prompt()?,
     )
@@ -115,9 +114,9 @@ fn orgs(snapshot: &Snapshot, interactive: bool) -> Result<Vec<OrgMapping>, crate
   let mut mappings = Vec::new();
 
   if interactive {
-    let mut github_orgs = snapshot.users.github_users().github_orgs().into_iter().collect_vec();
+    let mut github_orgs = snapshot.users.github_users()?.github_orgs()?.into_iter().collect_vec();
 
-    if github_orgs.len() > 0 {
+    if !github_orgs.is_empty() {
       eprintln!(
         "found {} GitHub Orgs referenced in Okta User Profiles...",
         github_orgs.len()
@@ -157,7 +156,7 @@ fn roles(snapshot: &Snapshot, interactive: bool) -> Result<Vec<RoleMapping>, cra
     {
       for group in MultiSelect::new("Which Okta Groups?", snapshot.groups.to_okta_group_expectations()).prompt()? {
         if let Some(users) = snapshot.group_users.get(&group.id) {
-          let emails = users.github_users().user_emails();
+          let emails = users.github_users()?.user_emails();
 
           for okta_profile_email in MultiSelect::new("Assign Admin (Owner) role to which users?", emails)
             .with_all_selected_by_default()
@@ -176,7 +175,7 @@ fn roles(snapshot: &Snapshot, interactive: bool) -> Result<Vec<RoleMapping>, cra
       .with_default(true)
       .prompt()?
     {
-      let emails = snapshot.users.github_users().user_emails();
+      let emails = snapshot.users.github_users()?.user_emails();
 
       for okta_profile_email in MultiSelect::new("Assign Admin (Owner) role to which users?", emails).prompt()? {
         roles.push(RoleMapping {
@@ -193,32 +192,31 @@ fn roles(snapshot: &Snapshot, interactive: bool) -> Result<Vec<RoleMapping>, cra
 fn teams(snapshot: &Snapshot, interactive: bool) -> Result<Vec<TeamMapping>, crate::Error> {
   let mut teams = Vec::new();
 
-  if interactive {
-    if Confirm::new("Would you like to map any Okta Groups to GitHub Teams?")
+  if interactive
+    && Confirm::new("Would you like to map any Okta Groups to GitHub Teams?")
       .with_default(true)
       .prompt()?
-    {
-      let groups = MultiSelect::new(
-        "Which Okta Groups should map to GitHub Teams?",
-        snapshot.groups.to_okta_group_expectations(),
-      )
-      .prompt()?;
+  {
+    let groups = MultiSelect::new(
+      "Which Okta Groups should map to GitHub Teams?",
+      snapshot.groups.to_okta_group_expectations(),
+    )
+    .prompt()?;
 
-      for group in groups {
-        let OktaGroupExpectation {
-          id: okta_group_id,
-          profile_name,
-        } = group;
-        let mut github_team_name = profile_name.to_kebab_case();
+    for group in groups {
+      let OktaGroupExpectation {
+        id: okta_group_id,
+        profile_name,
+      } = group;
+      let mut github_team_name = profile_name.to_kebab_case();
 
-        let message = format!("Okta Group '{profile_name}' maps to which GitHub Team?");
-        github_team_name = Text::new(&message).with_initial_value(&github_team_name).prompt()?;
+      let message = format!("Okta Group '{profile_name}' maps to which GitHub Team?");
+      github_team_name = Text::new(&message).with_initial_value(&github_team_name).prompt()?;
 
-        teams.push(TeamMapping {
-          github_team_name,
-          okta_group_id,
-        });
-      }
+      teams.push(TeamMapping {
+        github_team_name,
+        okta_group_id,
+      });
     }
   }
 
@@ -414,39 +412,45 @@ impl ToOktaGroupExpectations for [Group] {
 }
 
 trait GithubUsers {
-  fn github_users(&self) -> Vec<&User>;
+  fn github_users(&self) -> Result<Vec<&User>, crate::Error>;
 }
 
 impl GithubUsers for [User] {
-  fn github_users(&self) -> Vec<&User> {
-    self
-      .into_iter()
-      .filter(|user| match user {
-        User {
-          profile: UserProfile {
-            github_username: Some(usernames),
-            ..
-          },
-          ..
-        } if !usernames.is_empty() => true,
-        _ => false,
-      })
-      .collect()
+  fn github_users(&self) -> Result<Vec<&User>, crate::Error> {
+    let mut users = Vec::new();
+
+    for user in self {
+      if user
+        .profile
+        .extensions_into::<UserProfileExtensions>()?
+        .github_username
+        .is_some_and(|username| !username.is_empty())
+      {
+        users.push(user)
+      }
+    }
+
+    Ok(users)
   }
 }
 
 trait GitHubUsernames {
-  fn github_usernames(&self) -> Vec<String>;
+  fn github_usernames(&self) -> Result<Vec<String>, crate::Error>;
 }
 
 impl GitHubUsernames for [&User] {
-  fn github_usernames(&self) -> Vec<String> {
-    self
-      .into_iter()
-      .filter_map(|user| user.profile.github_username.as_ref())
-      .flatten()
-      .map(ToOwned::to_owned)
-      .collect()
+  fn github_usernames(&self) -> Result<Vec<String>, crate::Error> {
+    let mut usernames = Vec::new();
+
+    for user in self {
+      if let Some(github) = user.profile.extensions_into::<UserProfileExtensions>()?.github_username {
+        for username in github {
+          usernames.push(username);
+        }
+      }
+    }
+
+    Ok(usernames)
   }
 }
 
@@ -471,26 +475,21 @@ impl UserEmails for [&User] {
 }
 
 trait GithubOrgs {
-  fn github_orgs(&self) -> BTreeSet<String>;
+  fn github_orgs(&self) -> Result<BTreeSet<String>, crate::Error>;
 }
 
 impl GithubOrgs for [&User] {
-  fn github_orgs(&self) -> BTreeSet<String> {
-    self
-      .iter()
-      .filter_map(|user| match user {
-        User {
-          profile: UserProfile {
-            github_orgs: Some(orgs),
-            ..
-          },
-          ..
-        } if !orgs.is_empty() => Some(orgs),
-        _ => None,
-      })
-      .flatten()
-      .unique()
-      .map(ToOwned::to_owned)
-      .collect()
+  fn github_orgs(&self) -> Result<BTreeSet<String>, crate::Error> {
+    let mut orgs = BTreeSet::new();
+
+    for user in self {
+      if let Some(github) = user.profile.extensions_into::<UserProfileExtensions>()?.github_orgs {
+        for org in github {
+          orgs.insert(org);
+        }
+      }
+    }
+
+    Ok(orgs)
   }
 }

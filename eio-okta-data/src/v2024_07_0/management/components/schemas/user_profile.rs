@@ -1,6 +1,16 @@
+use serde::de::{DeserializeOwned, IntoDeserializer};
+use serde_json::Value;
+use std::collections::BTreeMap;
+
 #[crate::apply(crate::structs!)]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct UserProfile {
+  #[cfg_attr(feature = "arbitrary", arbitrary(default))]
+  #[cfg_attr(feature = "comparable", comparable_ignore)]
+  #[cfg_attr(feature = "patch", patch(skip))]
+  #[cfg_attr(feature = "proptest", proptest(value = "Default::default()"))]
+  #[cfg_attr(feature = "serde", serde(flatten))]
+  pub _extensions: BTreeMap<String, Value>,
   #[cfg_attr(feature = "dummy", dummy(faker = "crate::fake::address::custom::CityName()"))]
   #[cfg_attr(feature = "proptest", proptest(strategy = "crate::strategy::std::option_string_with_length(0..=128)"))]
   #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
@@ -32,12 +42,6 @@ pub struct UserProfile {
   #[cfg_attr(feature = "proptest", proptest(strategy("crate::strategy::std::option_string_with_length(1..=50)")))]
   #[cfg_attr(feature = "validate", validate(length(min = 1, max = 50)))]
   pub first_name: Option<String>,
-  // deviant
-  #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
-  pub github_orgs: Option<Vec<String>>,
-  // deviant
-  #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
-  pub github_username: Option<Vec<String>>,
   #[cfg_attr(feature = "dummy", dummy(faker = "crate::fake::name::custom::Title()"))]
   #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
   pub honorific_prefix: Option<String>,
@@ -128,4 +132,10 @@ crate::impl_as_ref!(UserProfile);
 mod tests {
   crate::testing::roundtrip!(super::UserProfile);
   crate::testing::validate!(super::UserProfile);
+}
+
+impl UserProfile {
+  pub fn extensions_into<T: DeserializeOwned>(&self) -> serde_json::Result<T> {
+    T::deserialize(self._extensions.clone().into_deserializer())
+  }
 }

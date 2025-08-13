@@ -1,8 +1,8 @@
 use crate::crossplane::ProviderConfigReference;
-use crate::okta::Snapshot;
+use crate::okta::{Snapshot, UserProfileExtensions};
 use crate::{crossplane, github, kubernetes};
 use camino::Utf8PathBuf;
-use eio_okta_data::current::management::components::schemas::{User, UserProfile};
+use eio_okta_data::current::management::components::schemas::User;
 use fancy_regex::Regex;
 use fs_err::File;
 use std::collections::{HashMap, HashSet};
@@ -272,32 +272,24 @@ pub(crate) struct IgnoredUsers {
 }
 
 impl IgnoredUsers {
-  pub(crate) fn contains(
-    &self,
-    User {
-      profile: UserProfile {
-        email, github_username, ..
-      },
-      ..
-    }: &User,
-  ) -> bool {
+  pub(crate) fn contains(&self, User { profile, .. }: &User) -> Result<bool, crate::Error> {
     for ignored in &self.okta_profile_emails {
-      if email.eq_ignore_ascii_case(&ignored) {
-        return true;
+      if profile.email.eq_ignore_ascii_case(ignored) {
+        return Ok(true);
       }
     }
 
-    if let Some(usernames) = github_username {
+    if let Some(usernames) = profile.extensions_into::<UserProfileExtensions>()?.github_username {
       for username in usernames {
         for ignored in &self.github_usernames {
-          if username.eq_ignore_ascii_case(&ignored) {
-            return true;
+          if username.eq_ignore_ascii_case(ignored) {
+            return Ok(true);
           }
         }
       }
     }
 
-    false
+    Ok(false)
   }
 }
 
@@ -386,7 +378,7 @@ impl Command {
           failed = true;
         }
         Some(group) => {
-          if !(group.profile.name == profile_name.as_str()) {
+          if group.profile.name != profile_name.as_str() {
             eprintln!(
               "expected profile name: '{profile_name}', but found '{}' instead",
               &group.profile.name
@@ -421,12 +413,12 @@ impl Command {
         continue;
       }
 
-      if mappings.ignored_users.contains(user) {
+      if mappings.ignored_users.contains(user)? {
         eprintln!("Actively Ignoring User: {}", &user.profile.email);
         continue;
       }
 
-      if let Some(ref usernames) = user.profile.github_username {
+      if let Some(ref usernames) = user.profile.extensions_into::<UserProfileExtensions>()?.github_username {
         for username in usernames {
           let username = username.trim().to_lowercase();
 
@@ -438,7 +430,7 @@ impl Command {
             continue;
           }
 
-          if let Some(ref orgs) = user.profile.github_orgs {
+          if let Some(ref orgs) = user.profile.extensions_into::<UserProfileExtensions>()?.github_orgs {
             for org in orgs {
               if let Some(org) = mappings
                 .orgs
@@ -478,7 +470,7 @@ impl Command {
                       name: crossplane
                         .provider_config_ref_name
                         .as_ref()
-                        .unwrap_or_else(|| &org_name)
+                        .unwrap_or(org_name)
                         .to_owned(),
                       policy: None,
                     },
@@ -509,9 +501,9 @@ impl Command {
     for (group, users) in snapshot.group_users {
       if let Some(team) = mappings.teams.iter().find(|mapping| mapping.okta_group_id.eq(&group)) {
         for user in users {
-          if let Some(ref usernames) = user.profile.github_username {
+          if let Some(ref usernames) = user.profile.extensions_into::<UserProfileExtensions>()?.github_username {
             for username in usernames {
-              if let Some(ref orgs) = user.profile.github_orgs {
+              if let Some(ref orgs) = user.profile.extensions_into::<UserProfileExtensions>()?.github_orgs {
                 for org in orgs {
                   if let Some(org) = mappings
                     .orgs
@@ -550,9 +542,8 @@ impl Command {
                         provider_config_ref: crossplane::ProviderConfigReference {
                           name: crossplane
                             .provider_config_ref_name
-                            .as_ref()
-                            .map(String::as_str)
-                            .unwrap_or_else(|| org_name)
+                            .as_deref()
+                            .unwrap_or(org_name)
                             .to_owned(),
                           policy: None,
                         },
@@ -611,7 +602,7 @@ impl Command {
             name: crossplane
               .provider_config_ref_name
               .as_ref()
-              .unwrap_or_else(|| &org_name)
+              .unwrap_or(&org_name)
               .to_owned(),
             policy: None,
           },
@@ -641,7 +632,7 @@ impl Command {
 
     let yaml = serde_yml::to_string(&resources)?;
 
-    fs_err::write(&output, &yaml)?;
+    fs_err::write(output, &yaml)?;
 
     eprintln!("\n[OK] resources saved to {output}");
 

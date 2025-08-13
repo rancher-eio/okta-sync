@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- (FEATURE) UserProfile now supports custom properties.
+- (BREAKING) changed fields on UserProfile
+  - removed non-standard github_orgs / github_username fields.
+  - added `_extensions: BTreeMap<String, Value>` field to capture all custom properties
+  - added `extensions_into<T: DeserializeOwned>()` method for deserializing into custom types.
+- (BREAKING/MITIGATION) use `_extensions` or `extensions_into()` to read custom fields.
+
 ## 0.3.0
 
 - (BREAKING BUGFIX) add missing `UserStatus` variant: `UserStatus::Recovery`.

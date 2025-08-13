@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- (FEATURE) user profiles now support custom properties.
+- (DEPENDENCY) eio-okta-api 0.3.0 -> 0.4.0
+
 ## 0.2.2
 
 - (DEPENDENCY) eio-okta-api 0.2.1 -> 0.3.0

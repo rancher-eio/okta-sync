@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-sync"
-version = "0.5.3"
+version = "0.6.0"
 description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
 rust-version.workspace = true
 edition.workspace = true
@@ -38,7 +38,11 @@ clap = { workspace = true, features = [
   "usage",
   "wrap_help",
 ] }
-console = { workspace = true, features = ["ansi-parsing", "unicode-width"] }
+console = { workspace = true, features = [
+  "ansi-parsing",
+  "std",
+  "unicode-width",
+] }
 educe = { workspace = true, features = ["Clone", "Debug", "Eq", "PartialEq"] }
 fancy-regex = { workspace = true, features = ["perf", "std", "unicode"] }
 indexmap = { workspace = true, features = ["serde"] }
@@ -62,7 +66,7 @@ update-informer = { workspace = true, features = [
   "ureq",
 ] }
 
-octocrab = "0.43.0"
+octocrab = "0.44.1"
 rand.workspace = true
 
 [[bench]]

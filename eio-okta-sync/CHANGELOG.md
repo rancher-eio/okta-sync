@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+
+- (FEATURE) Okta snapshots now support custom properties in user profiles.
+- (INTERNAL) fixed several clippy lints
+
 ## 0.5.2
 
 - (FEATURE) generated Team and TeamMembership resources now support --embed-github-org-name.
