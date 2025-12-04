@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0
+
+- (FEATURE) added org-graph commands for working with snapshots as graph data.
+  - (FEATURE) "org-graph dot" can produce DOT output for rendering with GraphViz.
+  - (FRATURE) "org-graph path" can map paths to users within the org hierarchy.
+- (INTERNAL) updated UserProfileExtensions to include additional fields.
+- (INTERNAL) unified snapshot loading code.
+
 ## 0.6.0
 
 - (FEATURE) Okta snapshots now support custom properties in user profiles.

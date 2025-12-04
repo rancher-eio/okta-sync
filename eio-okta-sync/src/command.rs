@@ -4,6 +4,7 @@ mod generate;
 mod make_archive;
 mod mappings;
 mod members;
+mod org_graph;
 mod snapshot;
 
 use clap::Parser;
@@ -18,6 +19,8 @@ pub enum Command {
   MakeArchive(make_archive::Command),
   Mappings(mappings::Command),
   Members(members::Command),
+  #[command(subcommand)]
+  OrgGraph(org_graph::Command),
   Snapshot(snapshot::Command),
 }
 
@@ -30,6 +33,7 @@ impl Command {
       Self::MakeArchive(command) => command.run(),
       Self::Mappings(command) => command.run(),
       Self::Members(command) => command.run().await,
+      Self::OrgGraph(command) => command.run(),
       Self::Snapshot(command) => command.run(),
     }
   }

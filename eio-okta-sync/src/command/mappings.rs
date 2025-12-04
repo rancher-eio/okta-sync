@@ -6,7 +6,7 @@ use eio_okta_data::current::management::components::schemas::{Group, GroupProfil
 use heck::ToKebabCase;
 use inquire::{Confirm, MultiSelect, Select, Text};
 use itertools::Itertools;
-use rand::{rng, seq::IndexedRandom, Rng};
+use rand::{Rng, rng, seq::IndexedRandom};
 
 use crate::command::generate::{
   Expectations, IgnoredUsers, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping,
@@ -40,8 +40,7 @@ impl Command {
   pub fn run(self) -> Result<(), crate::Error> {
     let Self { interactive, snapshot } = self;
 
-    let yaml = fs_err::read_to_string(&snapshot)?;
-    let snapshot: Snapshot = serde_yml::from_str(&yaml)?;
+    let snapshot = Snapshot::read_from_file(snapshot)?;
 
     let mappings = Mappings {
       expectations: expectations(&snapshot, interactive)?,
@@ -131,7 +130,9 @@ fn orgs(snapshot: &Snapshot, interactive: bool) -> Result<Vec<OrgMapping>, crate
 
         for okta_profile_github_org in github_orgs {
           let mut github_org_name = okta_profile_github_org.to_kebab_case();
-          let message = format!("Okta Users whose .profile.githubOrgs[] contains '{okta_profile_github_org}' will be members of which Org on GitHub?");
+          let message = format!(
+            "Okta Users whose .profile.githubOrgs[] contains '{okta_profile_github_org}' will be members of which Org on GitHub?"
+          );
           github_org_name = Text::new(&message).with_initial_value(&github_org_name).prompt()?;
 
           mappings.push(OrgMapping {
@@ -243,7 +244,9 @@ fn expectations(snapshot: &Snapshot, interactive: bool) -> Result<Expectations, 
     }
   }
 
-  eprintln!("\nTo mitigate this, we can indicate what we expect the profile name to be, this can be used to check these assumptions in future runs.");
+  eprintln!(
+    "\nTo mitigate this, we can indicate what we expect the profile name to be, this can be used to check these assumptions in future runs."
+  );
 
   if interactive {
     okta_groups = inquire::MultiSelect::new("Which Okta Groups do you want to use?", groups)

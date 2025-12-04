@@ -361,12 +361,7 @@ impl Command {
       serde_yml::from_slice(&buf)?
     };
 
-    let snapshot: Snapshot = {
-      let mut buf = Vec::new();
-      let mut file = File::open(snapshot)?;
-      file.read_to_end(&mut buf)?;
-      serde_yml::from_slice(&buf)?
-    };
+    let snapshot = Snapshot::read_from_file(snapshot)?;
 
     let mut failed = false;
 

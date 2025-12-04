@@ -1,3 +1,4 @@
+pub(crate) mod graph;
 mod snapshot;
 mod user_profile;
 
