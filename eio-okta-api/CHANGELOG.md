@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- (BREAKING) v1::groups::* modules are now crate-private, as they were intended to be.
+  - (BREAKING/MITIGATION) - use the exported modules instead.
+- (FEATURE) added v1::groups::AssignUserToGroup.
+- (FEATURE) added v1::groups::UnassignUserFromGroup.
+
 ## 0.4.0
 
 - (FEATURE) user profiles now support custom properties.

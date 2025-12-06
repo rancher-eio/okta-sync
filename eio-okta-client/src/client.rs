@@ -93,7 +93,13 @@ where
   {
     let (request, _body) = self.callable(endpoint)?;
     let response = request.call()?;
-    Ok(response.into_json()?)
+    let body = if response.status() == 204 {
+      serde_json::from_str("null")?
+    } else {
+      response.into_json()?
+    };
+
+    Ok(body)
   }
 
   pub fn paginate<T>(&self, endpoint: T) -> Result<Vec<<T as Pagination>::Item>, Error>

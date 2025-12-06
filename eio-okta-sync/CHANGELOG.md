@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1
+
+- (DEPENDENCY) eio-okta-client 0.3.0 -> 0.4.0
+- (DEPENDENCY) inquire 0.7.5 -> 0.9.1
+- (DEPENDENCY) octocrab 0.44.1 -> 0.48.1
+
 ## 0.7.0
 
 - (FEATURE) added org-graph commands for working with snapshots as graph data.

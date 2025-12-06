@@ -17,12 +17,14 @@ pub struct Command {
 #[derive(Debug, Subcommand)]
 #[remain::sorted]
 pub enum Operation {
+  AssignUserToGroup(groups::AssignUserToGroup),
   GetGroup(groups::GetGroup),
   GetUser(users::GetUser),
   ListAssignedApplicationsForGroup(groups::ListAssignedApplicationsForGroup),
   ListGroups(groups::ListGroups),
   ListGroupUsers(groups::ListGroupUsers),
   ListUsers(users::ListUsers),
+  UnassignUserFromGroup(groups::UnassignUserFromGroup),
 }
 
 impl Command {
@@ -39,12 +41,14 @@ impl Command {
     let json = {
       #[remain::sorted]
       match operation {
+        Operation::AssignUserToGroup(endpoint) => client.json(endpoint, pretty),
         Operation::GetGroup(endpoint) => client.json(endpoint, pretty),
         Operation::GetUser(endpoint) => client.json(endpoint, pretty),
         Operation::ListAssignedApplicationsForGroup(endpoint) => client.autopaginate_json(endpoint, pretty),
         Operation::ListGroups(endpoint) => client.autopaginate_json(endpoint, pretty),
         Operation::ListGroupUsers(endpoint) => client.autopaginate_json(endpoint, pretty),
         Operation::ListUsers(endpoint) => client.autopaginate_json(endpoint, pretty),
+        Operation::UnassignUserFromGroup(endpoint) => client.json(endpoint, pretty),
       }
     }?;
 

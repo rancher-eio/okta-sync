@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+- (FEATURE) added subcommand: assign-user-to-group
+- (FEATURE) added subcommand: unassign-user-from-group
+- (BREAKING) HTTP 204 responses now use a fixed null value, rather than trying to read from the empty body.
+- (DEPENDENCY) eio-okta-api 0.4.0 -> 0.5.0
+
 ## 0.3.0
 
 - (FEATURE) user profiles now support custom properties.

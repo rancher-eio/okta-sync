@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- (DEPENDENCY) proptest_derive 0.6.0 -> 0.7.0
+- (DEPENDENCY) mediatype 0.20.0 -> 0.21.0
+
 ## 0.4.0
 
 - (FEATURE) UserProfile now supports custom properties.
