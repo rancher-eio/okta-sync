@@ -250,7 +250,10 @@ impl EmbedGithubOrgName {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Mappings {
   pub(crate) expectations: Expectations,
-  pub(crate) ignored_users: IgnoredUsers,
+  #[serde(alias = "ignoredUsers")]
+  pub(crate) exclude_users: UserCriteria,
+  #[serde(default)]
+  pub(crate) include_users: UserCriteria,
   pub(crate) orgs: Vec<OrgMapping>,
   pub(crate) roles: Vec<RoleMapping>,
   pub(crate) teams: Vec<TeamMapping>,
@@ -264,22 +267,30 @@ pub(crate) struct Expectations {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct IgnoredUsers {
+pub(crate) struct UserCriteria {
   #[serde(default, skip_serializing_if = "Vec::is_empty")]
   pub(crate) github_usernames: Vec<String>,
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) okta_ids: Vec<String>,
   #[serde(default, skip_serializing_if = "Vec::is_empty")]
   pub(crate) okta_profile_emails: Vec<String>,
 }
 
-impl IgnoredUsers {
-  pub(crate) fn contains(&self, User { profile, .. }: &User) -> Result<bool, crate::Error> {
-    for ignored in &self.okta_profile_emails {
-      if profile.email.eq_ignore_ascii_case(ignored) {
+impl UserCriteria {
+  pub(crate) fn matches(&self, user: &User) -> Result<bool, crate::Error> {
+    for id in &self.okta_ids {
+      if user.id.eq_ignore_ascii_case(id) {
         return Ok(true);
       }
     }
 
-    if let Some(usernames) = profile.extensions_into::<UserProfileExtensions>()?.github_username {
+    for email in &self.okta_profile_emails {
+      if user.profile.email.eq_ignore_ascii_case(email) {
+        return Ok(true);
+      }
+    }
+
+    if let Some(usernames) = user.profile.extensions_into::<UserProfileExtensions>()?.github_username {
       for username in usernames {
         for ignored in &self.github_usernames {
           if username.eq_ignore_ascii_case(ignored) {
@@ -390,7 +401,7 @@ impl Command {
 
     let mut org_memberships = Vec::with_capacity(snapshot.users.len());
 
-    let mut users = Vec::new();
+    let mut users = HashSet::new();
 
     if *all_users {
       users.extend(&snapshot.users);
@@ -398,6 +409,13 @@ impl Command {
       for OktaGroupExpectation { id: group_id, .. } in &mappings.expectations.okta_groups {
         if let Some(group_users) = snapshot.group_users.get(group_id) {
           users.extend(group_users);
+        }
+      }
+
+      for user in &snapshot.users {
+        if mappings.include_users.matches(user)? {
+          eprintln!("Including User: {}", &user.profile.email);
+          users.insert(user);
         }
       }
     }
@@ -408,8 +426,8 @@ impl Command {
         continue;
       }
 
-      if mappings.ignored_users.contains(user)? {
-        eprintln!("Actively Ignoring User: {}", &user.profile.email);
+      if mappings.exclude_users.matches(user)? {
+        eprintln!("Excluding User: {}", &user.profile.email);
         continue;
       }
 

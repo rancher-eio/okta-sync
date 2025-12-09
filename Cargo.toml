@@ -13,9 +13,9 @@ keywords = ["EIO"]
 
 [workspace.dependencies]
 # Internal Crates
-eio-okta-api = { path = "eio-okta-api", version = "0.5.0" }
-eio-okta-client = { path = "eio-okta-client", version = "0.4.0" }
-eio-okta-data = { path = "eio-okta-data", version = "0.4.1" }
+eio-okta-api = { path = "eio-okta-api", version = "0.6.0" }
+eio-okta-client = { path = "eio-okta-client", version = "0.4.1" }
+eio-okta-data = { path = "eio-okta-data", version = "0.5.0" }
 
 # Unmerged Upstream Patches
 comparable = { version = "0.5.4", git = "https://github.com/jwiegley/comparable.git", rev = "refs/pull/5/head", default-features = false, features = [
@@ -23,10 +23,10 @@ comparable = { version = "0.5.4", git = "https://github.com/jwiegley/comparable.
 ] }
 
 # Dependencies
+bon = { version = "3.8.1", default-features = false }
 chrono = { version = "0.4.41", default-features = false }
 clap = { version = "4.5.45", default-features = false }
 console = { version = "0.16.0", default-features = false }
-derive_builder = { version = "0.20.2", default-features = false }
 divan = { version = "0.1.21", default-features = false }
 educe = { version = "0.6.0", default-features = false }
 email_address = { version = "0.2.9", default-features = false }

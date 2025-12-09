@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.2
+
+- (CHANGE) renamed field in mappings: ignoredUsers -> excludeUsers (old name still supported for compatibility)
+- (FEATURE) added support for including users in mappings regardless of group membership (use `includeUsers: {}`)
+- (FEATURE) added support for matching Okta IDs in mappings excludeUsers/includeUsers (use `oktaIds: []`)
+- (DEPENDENCY) eio-okta-client 0.4.0 -> 0.4.1
+- (DEPENDENCY/ADD) using bon in eio-okta-sync
+- (DEPENDENCY/ADD) using chrono in eio-okta-sync
+
 ## 0.7.1
 
 - (DEPENDENCY) eio-okta-client 0.3.0 -> 0.4.0

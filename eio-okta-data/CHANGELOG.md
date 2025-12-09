@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+- (BREAKING) replaced `derive_builder` with `bon`
+  - this replaces an entire class of runtime errors with compile-time checks.
+  - setters no longer accept `impl Into<T>`, except for `String` fields.
+    - the old behaviour can be reintroduced selectively as needed.
+- (BREAKING/MITIGATION) use `T::builder().set(value).build()` instead of `T::default().set(value).build().unwrap()`.
+
 ## 0.4.1
 
 - (DEPENDENCY) proptest_derive 0.6.0 -> 0.7.0

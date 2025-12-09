@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0
+
+- (DEPENDENCY) eio-okta-data 0.4.0 -> 0.5.0
+
 ## 0.5.0
 
 - (BREAKING) v1::groups::* modules are now crate-private, as they were intended to be.

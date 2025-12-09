@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-data"
-version = "0.4.1"
+version = "0.5.0"
 description = "Data Types for Okta"
 rust-version.workspace = true
 edition.workspace = true
@@ -27,7 +27,7 @@ default = [
 ]
 
 arbitrary = ["dep:arbitrary", "chrono/arbitrary"]
-builder = ["dep:derive_builder"]
+builder = ["dep:bon"]
 clap = ["dep:clap"]
 comparable = ["dep:comparable"]
 dummy = ["dep:fake", "proptest", "dep:rand", "dep:constcat"]
@@ -55,10 +55,10 @@ remain.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 
 arbitrary = { workspace = true, optional = true, features = ["derive"] }
+bon = { workspace = true, optional = true, features = ["alloc", "std"] }
 clap = { workspace = true, optional = true, features = ["derive", "std"] }
 comparable = { workspace = true, optional = true, features = ["derive"] }
 constcat = { workspace = true, optional = true }
-derive_builder = { workspace = true, optional = true, features = ["std"] }
 educe = { workspace = true, optional = true, features = [
   "Clone",
   "Debug",

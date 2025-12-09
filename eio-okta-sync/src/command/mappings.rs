@@ -9,7 +9,7 @@ use itertools::Itertools;
 use rand::{Rng, rng, seq::IndexedRandom};
 
 use crate::command::generate::{
-  Expectations, IgnoredUsers, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping,
+  Expectations, Mappings, OktaGroupExpectation, OrgMapping, RoleMapping, TeamMapping, UserCriteria,
 };
 use crate::github::membership::Role::Admin;
 use crate::okta::{Snapshot, UserProfileExtensions};
@@ -44,7 +44,8 @@ impl Command {
 
     let mappings = Mappings {
       expectations: expectations(&snapshot, interactive)?,
-      ignored_users: ignored_users(&snapshot, interactive)?,
+      exclude_users: ignored_users(&snapshot, interactive)?,
+      include_users: Default::default(),
       orgs: orgs(&snapshot, interactive)?,
       roles: roles(&snapshot, interactive)?,
       teams: teams(&snapshot, interactive)?,
@@ -58,18 +59,19 @@ impl Command {
   }
 }
 
-fn ignored_users(snapshot: &Snapshot, interactive: bool) -> Result<IgnoredUsers, crate::Error> {
+fn ignored_users(snapshot: &Snapshot, interactive: bool) -> Result<UserCriteria, crate::Error> {
   if interactive
     && Confirm::new("Do you want to ignore any users?")
       .with_default(false)
       .prompt()?
   {
-    Ok(IgnoredUsers {
+    Ok(UserCriteria {
       github_usernames: ignored_users_by_github_username(snapshot, interactive)?,
+      okta_ids: Default::default(),
       okta_profile_emails: ignored_users_by_okta_profile_email(snapshot, interactive)?,
     })
   } else {
-    Ok(IgnoredUsers::default())
+    Ok(UserCriteria::default())
   }
 }
 
