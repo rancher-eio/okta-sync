@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.0
+
+- (FEATURE) added support for including entire org trees to mapping config (use `includeOrgTree.belowOktaIds: []`)
+- (FEATURE) added details of why a user is skipped when generating resources.
+
 ## 0.7.2
 
 - (CHANGE) renamed field in mappings: ignoredUsers -> excludeUsers (old name still supported for compatibility)

@@ -45,6 +45,7 @@ impl Command {
     let mappings = Mappings {
       expectations: expectations(&snapshot, interactive)?,
       exclude_users: ignored_users(&snapshot, interactive)?,
+      include_org_tree: Default::default(),
       include_users: Default::default(),
       orgs: orgs(&snapshot, interactive)?,
       roles: roles(&snapshot, interactive)?,

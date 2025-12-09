@@ -1,11 +1,12 @@
 use crate::crossplane::ProviderConfigReference;
+use crate::okta::graph::Org;
 use crate::okta::{Snapshot, UserProfileExtensions};
 use crate::{crossplane, github, kubernetes};
 use camino::Utf8PathBuf;
 use eio_okta_data::current::management::components::schemas::User;
 use fancy_regex::Regex;
 use fs_err::File;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::io::Read;
 
 #[derive(educe::Educe, clap::Args)]
@@ -253,6 +254,8 @@ pub(crate) struct Mappings {
   #[serde(alias = "ignoredUsers")]
   pub(crate) exclude_users: UserCriteria,
   #[serde(default)]
+  pub(crate) include_org_tree: OrgTreeCriteria,
+  #[serde(default)]
   pub(crate) include_users: UserCriteria,
   pub(crate) orgs: Vec<OrgMapping>,
   pub(crate) roles: Vec<RoleMapping>,
@@ -302,6 +305,13 @@ impl UserCriteria {
 
     Ok(false)
   }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct OrgTreeCriteria {
+  #[serde(default)]
+  below_okta_ids: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -414,20 +424,32 @@ impl Command {
 
       for user in &snapshot.users {
         if mappings.include_users.matches(user)? {
-          eprintln!("Including User: {}", &user.profile.email);
+          eprintln!("Including User (Config): {}", &user.profile.email);
           users.insert(user);
+        }
+      }
+
+      if !mappings.include_org_tree.below_okta_ids.is_empty() {
+        let org = Org::new(&snapshot.users).populate_descending();
+
+        for okta_id in &mappings.include_org_tree.below_okta_ids {
+          let tree = &org.below(&okta_id);
+
+          eprintln!("Including {} Users in Org Tree: {}", tree.len(), okta_id);
+
+          users.extend(snapshot.users.iter().filter(|user| tree.contains(&user.id.as_str())));
         }
       }
     }
 
     for user in users {
       if !user.status.is_active() {
-        eprintln!("Skipping {} User: {}", &user.status, &user.profile.email);
+        eprintln!("Skipping User (Status is {}): {}", &user.status, &user.profile.email);
         continue;
       }
 
       if mappings.exclude_users.matches(user)? {
-        eprintln!("Excluding User: {}", &user.profile.email);
+        eprintln!("Excluding User (Config): {}", &user.profile.email);
         continue;
       }
 
@@ -437,7 +459,7 @@ impl Command {
 
           if !valid_github_username.is_match(&username)? {
             eprintln!(
-              "Skipping Invalid GitHub Username ('{}') for User: {}",
+              "Skipping User (Invalid GitHub Username ('{}')): {}",
               &username, &user.profile.email
             );
             continue;
@@ -502,8 +524,18 @@ impl Command {
                 org_memberships.push(resource);
               }
             }
+          } else {
+            eprintln!(
+              "Skipping User (Okta Profile has no GitHub Orgs): {}",
+              &user.profile.email
+            );
           }
         }
+      } else {
+        eprintln!(
+          "Skipping User (Okta Profile has no GitHub Usernames): {}",
+          &user.profile.email
+        );
       }
     }
 
