@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0
+
+- (LIBRARY) added support for some GitHub Enterprise APIs.
+- (FEATURE) new commands for GitHub Enterprise operations.
+  - (FEATURE) "enterprise team assign-members" can assign members to an Enterprise Team based on okta snapshot graphs.
+  - (FEATURE) "enterprise cost-center assign-team" can assign all members of a team to a Cost Center.
+- (DEPENDENCY/NEW) added bounded-integer
+- (DEPENDENCY/NEW) added monostate
+- (DEPENDENCY/NEW) added uuid
+
 ## 0.8.0
 
 - (FEATURE) added support for including entire org trees to mapping config (use `includeOrgTree.belowOktaIds: []`)

@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-sync"
-version = "0.8.0"
+version = "0.9.0"
 description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
 rust-version.workspace = true
 edition.workspace = true
@@ -25,6 +25,7 @@ tar.workspace = true
 thiserror.workspace = true
 
 bon = { workspace = true, features = ["alloc", "std"] }
+bounded-integer = { workspace = true, features = ["serde1"] }
 camino = { workspace = true, features = ["serde1"] }
 chrono = { workspace = true, features = ["serde", "std"] }
 clap = { workspace = true, features = [
@@ -56,6 +57,7 @@ inquire = { workspace = true, features = [
   "one-liners",
 ] }
 itertools = { workspace = true, features = ["use_std"] }
+monostate = { workspace = true }
 miette = { workspace = true, features = ["derive", "fancy", "serde"] }
 petgraph = { workspace = true, features = ["graphmap", "serde-1", "std"] }
 semver = { workspace = true, features = ["serde", "std"] }
@@ -68,6 +70,7 @@ update-informer = { workspace = true, features = [
   "rustls-tls",
   "ureq",
 ] }
+uuid = { workspace = true, features = ["std", "serde"] }
 
 octocrab = "0.48.1"
 rand.workspace = true
