@@ -1,9 +1,8 @@
 use camino::Utf8PathBuf;
-use eio_okta_data::current::management::components::schemas::{User, UserProfile};
 use petgraph::{algo, visit::NodeIndexable};
 use std::{collections::BTreeSet, io::Read, time::Instant};
 
-use crate::okta::{Snapshot, graph::Org};
+use crate::okta::{DisplayName, Snapshot, graph::Org};
 
 #[derive(educe::Educe, clap::Args)]
 #[educe(Debug, Clone, PartialEq, Eq)]
@@ -243,36 +242,5 @@ impl Command {
     }
 
     Ok(())
-  }
-}
-
-trait DisplayName {
-  fn display_name(&self) -> String;
-}
-
-impl DisplayName for User {
-  fn display_name(&self) -> String {
-    match self.profile.as_ref() {
-      UserProfile {
-        first_name: Some(first_name),
-        last_name: Some(last_name),
-        ..
-      } => format!("{first_name} {last_name}"),
-      UserProfile {
-        first_name: Some(first_name),
-        last_name: None,
-        ..
-      } => format!("{first_name} MissingLastName"),
-      UserProfile {
-        first_name: None,
-        last_name: Some(last_name),
-        ..
-      } => format!("MissingFirstName {last_name}"),
-      UserProfile {
-        first_name: None,
-        last_name: None,
-        ..
-      } => String::from("MissingFirstName MissingLastName"),
-    }
   }
 }

@@ -8,7 +8,7 @@ use petgraph::visit::NodeIndexable;
 
 use crate::{
   github::Enterprise,
-  okta::{Snapshot, UserProfileExtensions, graph::Org},
+  okta::{DisplayName, Snapshot, UserProfileExtensions, graph::Org},
 };
 
 #[derive(Debug, clap::Parser)]
@@ -148,15 +148,23 @@ impl Command {
 
     eprintln!("org graph contains {} users", okta_org.hierarchy.node_count());
 
-    let root = root.unwrap_or_else(|| {
+    let root_id = root.unwrap_or_else(|| {
       eprintln!("no root given, defaulting to top of org");
       okta_org.hierarchy.from_index(0).to_owned()
     });
 
-    eprintln!("finding users in org graph from user '{root}'...");
+    let root = okta_org
+      .user(&root_id)
+      .expect(&format!("failed to find user in org graph with ID '{root_id}'"));
+
+    eprintln!(
+      "finding users in org graph from user '{}' ({})...",
+      &root.id,
+      root.display_name()
+    );
 
     let okta_users = okta_org
-      .below(&root)
+      .below(&root.id)
       .iter()
       .flat_map(|id| okta_org.user(id))
       .flat_map(|user| user.profile.extensions_into::<UserProfileExtensions>().ok())

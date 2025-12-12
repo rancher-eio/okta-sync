@@ -946,7 +946,7 @@ dependencies = [
 
 [[package]]
 name = "eio-okta-sync"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "bon",
  "bounded-integer",

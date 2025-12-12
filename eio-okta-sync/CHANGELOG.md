@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1
+
+- (ENHANCEMENT) "enterprise team assign-members" now indicates the name of the user, rather than just their Okta ID. (thanks to @Hypertrophik for the suggestion!)
+
 ## 0.9.0
 
 - (LIBRARY) added support for some GitHub Enterprise APIs.
@@ -13,7 +17,7 @@
 ## 0.8.0
 
 - (FEATURE) added support for including entire org trees to mapping config (use `includeOrgTree.belowOktaIds: []`)
-- (FEATURE) added details of why a user is skipped when generating resources.
+- (ENHANCEMENT) added details of why a user is skipped when generating resources.
 
 ## 0.7.2
 
@@ -122,6 +126,7 @@
 | Tag                | Description
 |--------------------|------------
 | BUGFIX             | something was wrong before, and now it isn't.
+| ENHANCEMENT        | something worked before, but now it works _better_.
 | DEPENDENCY/ADD     | added a dependency to this crate that is already used in the project.
 | DEPENDENCY/NEW     | added a dependency to the project.
 | INTERNAL           | noted for reference, but does not affect public interfaces.
