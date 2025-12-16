@@ -14,6 +14,7 @@ pub struct ListCostCentersRequest<'client> {
 }
 
 impl ListCostCentersRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise))]
   pub async fn send(self) -> octocrab::Result<ListCostCentersResponse> {
     let route = format!(
       "/enterprises/{enterprise}/settings/billing/cost-centers",

@@ -11,6 +11,7 @@ pub struct GetEnterpriseTeamRequest<'client> {
 }
 
 impl GetEnterpriseTeamRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, team = self.team))]
   pub async fn send(self) -> octocrab::Result<EnterpriseTeam> {
     let route = format!(
       "/enterprises/{enterprise}/teams/{team_slug}",
@@ -18,6 +19,16 @@ impl GetEnterpriseTeamRequest<'_> {
       team_slug = self.team
     );
     self.client.get(route, Option::<&()>::None).await
+  }
+}
+
+impl super::EnterpriseTeamsHandler<'_, '_> {
+  pub fn get(&self, team: impl Into<String>) -> GetEnterpriseTeamRequest<'_> {
+    GetEnterpriseTeamRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .team(team)
+      .build()
   }
 }
 

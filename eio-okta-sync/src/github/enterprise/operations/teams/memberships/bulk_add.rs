@@ -15,6 +15,7 @@ pub struct BulkAddEnterpriseTeamMembershipsRequest<'client> {
 }
 
 impl BulkAddEnterpriseTeamMembershipsRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, team = self.team, usernames = self.usernames.len()))]
   pub async fn send(self) -> octocrab::Result<Vec<EnterpriseTeamMembership>> {
     let route = format!(
       "/enterprises/{enterprise}/teams/{enterprise_team}/memberships/add",

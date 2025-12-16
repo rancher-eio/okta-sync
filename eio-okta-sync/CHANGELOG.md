@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.10.0
+
+- (FEATURE) "enterprise team assign-members" now has a `--strict` option (off by default). Enabling this will not only add missing users to the team, but remove ones that are not in the set of expected users.
+- (ENHANCEMENT) added instrumentation for GHE API calls.
+- (ENHANCEMENT) "enterprise team assign-members" now indicates which users would be added or removed during a dry-run.
+- (BUGFIX) "enterprise team assign-members" now trims leading/trailing whitespace from GitHub Usernames in Okta Profiles, since correctness isn't enforced there.
+- (LIB/FEATURE) added support for Organization Assignments with GitHub Enterprise.
+- (LIB/ENHANCEMENT) more consistent interfaces to Teams, Cost Centers, and Org Assignments.
+- (INTERNAL) default pagination increased to maximum for each resource.
+- (BREAKING/LIB) - `EnterpriseCostCentersHandler::update` now requires `cost_center_id` as an argument.
+  - (BREAKING/MITIGATION) - change `update().cost_center_id(cost_center_id)` to `update(cost_center_id)`.
+
 ## 0.9.1
 
 - (ENHANCEMENT) "enterprise team assign-members" now indicates the name of the user, rather than just their Okta ID. (thanks to @Hypertrophik for the suggestion!)

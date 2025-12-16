@@ -9,6 +9,7 @@ pub struct DeleteEnterpriseTeamRequest<'client> {
 }
 
 impl DeleteEnterpriseTeamRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, team = self.team))]
   pub async fn send(self) -> octocrab::Result<()> {
     let route = format!(
       "/enterprises/{enterprise}/teams/{team_slug}",
@@ -23,6 +24,16 @@ impl DeleteEnterpriseTeamRequest<'_> {
     } else {
       octocrab::FromResponse::from_response(octocrab::map_github_error(response).await?).await
     }
+  }
+}
+
+impl super::EnterpriseTeamsHandler<'_, '_> {
+  pub fn delete(&self, team: impl Into<String>) -> DeleteEnterpriseTeamRequest<'_> {
+    DeleteEnterpriseTeamRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .team(team)
+      .build()
   }
 }
 

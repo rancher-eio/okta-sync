@@ -24,6 +24,7 @@ pub struct AddResourcesRequest<'client> {
 }
 
 impl AddResourcesRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, cost_center_id = self.cost_center_id.to_string(), organizations = self.organizations.len(), repositories = self.repositories.len(), users = self.users.len()))]
   pub async fn send(self) -> octocrab::Result<AddedResourcesResponse> {
     let route = format!(
       "/enterprises/{enterprise}/settings/billing/cost-centers/{cost_center_id}/resource",
@@ -31,6 +32,18 @@ impl AddResourcesRequest<'_> {
       cost_center_id = self.cost_center_id
     );
     self.client.post(route, Some(&self)).await
+  }
+}
+
+impl super::EnterpriseCostCentersHandler<'_, '_> {
+  pub fn add_resources(
+    &self,
+    cost_center_id: Uuid,
+  ) -> AddResourcesRequestBuilder<'_, builder::SetCostCenterId<builder::SetEnterprise<builder::SetClient>>> {
+    AddResourcesRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .cost_center_id(cost_center_id)
   }
 }
 

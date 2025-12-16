@@ -10,13 +10,14 @@ pub struct ListEnterpriseTeamsRequest<'client> {
   client: &'client Octocrab,
   #[serde(skip)]
   enterprise: String,
-  #[builder(default = BoundedU8::const_new::<30>())]
+  #[builder(default = BoundedU8::MAX)]
   per_page: BoundedU8<0, 100>,
   #[builder(default = 1)]
   page: usize,
 }
 
 impl ListEnterpriseTeamsRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise))]
   pub async fn send(self) -> octocrab::Result<octocrab::Page<EnterpriseTeam>> {
     let route = format!("/enterprises/{enterprise}/teams", enterprise = self.enterprise);
     self.client.get(route, Some(&self)).await

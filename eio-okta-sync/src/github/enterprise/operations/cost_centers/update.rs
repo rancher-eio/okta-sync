@@ -16,6 +16,7 @@ pub struct UpdateCostCenterRequest<'client> {
 }
 
 impl UpdateCostCenterRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, name = self.name))]
   pub async fn send(self) -> octocrab::Result<CostCenter> {
     let route = format!(
       "/enterprises/{enterprise}/settings/billing/cost-centers/{cost_center_id}",
@@ -27,9 +28,24 @@ impl UpdateCostCenterRequest<'_> {
 }
 
 impl super::EnterpriseCostCentersHandler<'_, '_> {
-  pub fn update(&self) -> UpdateCostCenterRequestBuilder<'_, builder::SetEnterprise<builder::SetClient>> {
+  pub fn update(
+    &self,
+    cost_center_id: Uuid,
+  ) -> UpdateCostCenterRequestBuilder<'_, builder::SetCostCenterId<builder::SetEnterprise<builder::SetClient>>> {
     UpdateCostCenterRequest::builder()
       .client(self.client)
       .enterprise(self.enterprise)
+      .cost_center_id(cost_center_id)
+  }
+}
+
+impl super::EnterpriseCostCenterHandler<'_, '_, '_> {
+  pub fn update(
+    &self,
+  ) -> UpdateCostCenterRequestBuilder<'_, builder::SetCostCenterId<builder::SetEnterprise<builder::SetClient>>> {
+    UpdateCostCenterRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .cost_center_id(*self.cost_center_id)
   }
 }

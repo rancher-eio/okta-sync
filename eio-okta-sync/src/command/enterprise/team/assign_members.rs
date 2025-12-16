@@ -61,6 +61,14 @@ pub struct Command {
   snapshot: Utf8PathBuf,
   #[arg(
     long,
+    value_name    = "BOOL",
+    default_value = "false",
+    action        = clap::ArgAction::Set,
+    help          = "remove users from the team if they do not match the current criteria"
+  )]
+  strict: bool,
+  #[arg(
+    long,
     value_name     = "ID",
     conflicts_with = "team_name",
     help           = "the ID of an existing Enterprise Team to assign users from",
@@ -91,13 +99,14 @@ impl Command {
       org,
       root,
       snapshot,
+      strict,
       team_id,
       team_name,
     } = self;
 
     let github = Octocrab::builder().personal_token(token).build()?;
 
-    let per_page = BoundedU8::const_new::<100>();
+    let per_page = BoundedU8::MAX;
 
     let enterprise = github.enterprise(&enterprise);
 
@@ -169,7 +178,7 @@ impl Command {
       .flat_map(|id| okta_org.user(id))
       .flat_map(|user| user.profile.extensions_into::<UserProfileExtensions>().ok())
       .flat_map(|profile| profile.github_username.unwrap_or_default())
-      .map(|username| username.to_lowercase())
+      .map(|username| username.trim().to_lowercase())
       .collect::<BTreeSet<String>>();
 
     eprintln!("found {} GitHub usernames in relevant Okta profiles", okta_users.len());
@@ -222,14 +231,16 @@ impl Command {
       let total = missing_users.len();
       for chunk in missing_users.chunks(100) {
         eprintln!(
-          "adding {} of {} missing users to team {}",
+          "adding {} of {} missing users to team '{}'",
           chunk.len(),
           total,
           &team.slug
         );
 
         if dry_run {
-          eprintln!("skipping (dry-run)");
+          for user in chunk {
+            eprintln!("(dry-run) for team '{}', skip adding user '{user}'", &team.slug);
+          }
         } else {
           enterprise
             .team(&team.slug)
@@ -239,6 +250,40 @@ impl Command {
             .build()
             .send()
             .await?;
+        }
+      }
+    }
+
+    let unexpected_users = enterprise_team_members.difference(&okta_users).cloned().collect_vec();
+
+    if unexpected_users.is_empty() {
+      eprintln!("team '{}' contains no unexpected users", &team.slug);
+    } else {
+      let total = unexpected_users.len();
+      eprintln!("team '{}' contains {} unexpected users", &team.slug, total);
+      if strict {
+        for chunk in unexpected_users.chunks(100) {
+          eprintln!(
+            "removing {} of {} unexpected users from team '{}'",
+            chunk.len(),
+            total,
+            &team.slug
+          );
+
+          if dry_run {
+            for user in chunk {
+              eprintln!("(dry-run) for team '{}', skip removing user '{user}'", &team.slug);
+            }
+          } else {
+            enterprise
+              .team(&team.slug)
+              .memberships()
+              .bulk_remove()
+              .usernames(chunk.into())
+              .build()
+              .send()
+              .await?;
+          }
         }
       }
     }

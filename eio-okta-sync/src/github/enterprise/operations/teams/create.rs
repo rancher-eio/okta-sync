@@ -19,6 +19,7 @@ pub struct CreateEnterpriseTeamRequest<'client> {
 }
 
 impl CreateEnterpriseTeamRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, name = self.name))]
   pub async fn send(self) -> octocrab::Result<EnterpriseTeam> {
     let route = format!("/enterprises/{enterprise}/teams", enterprise = self.enterprise);
     self.client.post(route, Some(&self)).await
@@ -34,5 +35,16 @@ impl super::EnterpriseTeamsHandler<'_, '_> {
       .client(self.client)
       .enterprise(self.enterprise)
       .name(name)
+  }
+}
+
+impl super::EnterpriseTeamHandler<'_, '_, '_> {
+  pub fn create(
+    &self,
+  ) -> CreateEnterpriseTeamRequestBuilder<'_, builder::SetName<builder::SetEnterprise<builder::SetClient>>> {
+    CreateEnterpriseTeamRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .name(self.team)
   }
 }

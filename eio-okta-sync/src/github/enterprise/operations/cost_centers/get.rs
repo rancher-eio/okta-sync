@@ -12,6 +12,7 @@ pub struct GetCostCenterRequest<'client> {
 }
 
 impl GetCostCenterRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, cost_center_id = self.cost_center_id.to_string()))]
   pub async fn send(self) -> octocrab::Result<CostCenter> {
     let route = format!(
       "/enterprises/{enterprise}/settings/billing/cost-centers/{cost_center_id}",
@@ -19,6 +20,16 @@ impl GetCostCenterRequest<'_> {
       cost_center_id = self.cost_center_id
     );
     self.client.get(route, Option::<&()>::None).await
+  }
+}
+
+impl super::EnterpriseCostCentersHandler<'_, '_> {
+  pub fn get(&self, cost_center_id: Uuid) -> GetCostCenterRequest<'_> {
+    GetCostCenterRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .cost_center_id(cost_center_id)
+      .build()
   }
 }
 

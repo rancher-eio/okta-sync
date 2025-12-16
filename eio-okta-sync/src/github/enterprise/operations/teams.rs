@@ -5,6 +5,7 @@ mod delete;
 mod get;
 mod list;
 mod memberships;
+mod organizations;
 mod update;
 
 #[derive(Debug, bon::Builder)]

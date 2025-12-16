@@ -12,6 +12,7 @@ pub struct GetEnterpriseTeamMembershipRequest<'client> {
 }
 
 impl GetEnterpriseTeamMembershipRequest<'_> {
+  #[tracing::instrument(skip(self), fields(enterprise = self.enterprise, team = self.team, username = self.username))]
   pub async fn send(self) -> octocrab::Result<EnterpriseTeamMembership> {
     let route = format!(
       "/enterprises/{enterprise}/teams/{enterprise_team}/memberships/{username}",
@@ -20,6 +21,17 @@ impl GetEnterpriseTeamMembershipRequest<'_> {
       username = self.username,
     );
     self.client.get(route, Option::<&()>::None).await
+  }
+}
+
+impl super::EnterpriseTeamMembershipsHandler<'_, '_, '_> {
+  pub fn get(&self, username: impl Into<String>) -> GetEnterpriseTeamMembershipRequest<'_> {
+    GetEnterpriseTeamMembershipRequest::builder()
+      .client(self.client)
+      .enterprise(self.enterprise)
+      .team(self.team)
+      .username(username)
+      .build()
   }
 }
 
