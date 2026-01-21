@@ -2,7 +2,7 @@
 source: &source
   build: &build
     image: registry.suse.com/bci/rust  # {"$imagepolicy": "registry:bci-rust:name"}
-    tag: 1.89.0-1.2.8  # {"$imagepolicy": "registry:bci-rust:tag"}
+    tag: 1.91.0-2.3.5  # {"$imagepolicy": "registry:bci-rust:tag"}
   git: &git
     image: registry.suse.com/suse/git  # {"$imagepolicy": "registry:suse-git:name"}
     tag: 2.51.0-61.10  # {"$imagepolicy": "registry:suse-git:tag"}

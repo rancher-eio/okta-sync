@@ -1,0 +1,116 @@
+name: Binary Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_to_build:
+        description: 'The tag to build (e.g., 0.10.0)'
+        required: true
+
+jobs:
+  build-binaries:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [amd64, arm64]
+    outputs:
+      upstream_tag: ${{ steps.config.outputs.upstream_tag }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Parse config.yaml
+        id: config
+        run: |
+          CONFIG="docker/config.yaml"
+          echo "build_image=$(yq -r 'explode(.).source.build.image' $CONFIG)" >> $GITHUB_OUTPUT
+          echo "build_tag=$(yq -r 'explode(.).source.build.tag' $CONFIG)" >> $GITHUB_OUTPUT
+          echo "git_image=$(yq -r 'explode(.).source.git.image' $CONFIG)" >> $GITHUB_OUTPUT
+          echo "git_tag=$(yq -r 'explode(.).source.git.tag' $CONFIG)" >> $GITHUB_OUTPUT
+          echo "runtime_image=$(yq -r 'explode(.).source.runtime.image' $CONFIG)" >> $GITHUB_OUTPUT
+          echo "runtime_tag=$(yq -r 'explode(.).source.runtime.tag' $CONFIG)" >> $GITHUB_OUTPUT
+          
+          BUILD_TAG="${{ github.event.inputs.tag_to_build || github.ref_name }}"
+          echo "upstream_repo=$(yq -r 'explode(.).source.upstream.repository' $CONFIG)" >> $GITHUB_OUTPUT
+          echo "upstream_tag=$BUILD_TAG" >> $GITHUB_OUTPUT
+
+      - name: Pre-flight Check
+        run: |
+          echo "Checking variables for ${{ matrix.architecture }} build..."
+          if [ -z "${{ steps.config.outputs.build_image }}" ] || [ -z "${{ steps.config.outputs.runtime_image }}" ]; then
+            echo "ERROR: Failed to parse one or more image names from config.yaml"
+            exit 1
+          fi
+          echo "All variables verified. Starting Docker build."
+
+      - name: Build and Extract Binary
+        run: |
+          docker build \
+            --platform linux/${{ matrix.architecture }} \
+            -f docker/Dockerfile \
+            --target artifacts \
+            --output type=local,dest=./dist \
+            --build-arg SOURCE_BUILD_IMAGE="${{ steps.config.outputs.build_image }}" \
+            --build-arg SOURCE_BUILD_TAG="${{ steps.config.outputs.build_tag }}" \
+            --build-arg SOURCE_GIT_IMAGE="${{ steps.config.outputs.git_image }}" \
+            --build-arg SOURCE_GIT_TAG="${{ steps.config.outputs.git_tag }}" \
+            --build-arg SOURCE_RUNTIME_IMAGE="${{ steps.config.outputs.runtime_image }}" \
+            --build-arg SOURCE_RUNTIME_TAG="${{ steps.config.outputs.runtime_tag }}" \
+            --build-arg SOURCE_UPSTREAM_REPOSITORY="${{ steps.config.outputs.upstream_repo }}" \
+            --build-arg SOURCE_UPSTREAM_TAG="${{ steps.config.outputs.upstream_tag }}" \
+            .
+
+      - name: Package Binaries
+        run: |
+          mkdir -p release-assets
+          cp dist/usr/local/bin/* release-assets/
+          VERSION="${{ steps.config.outputs.upstream_tag }}"
+          tar -cvzf eio-okta-sync-${VERSION}-${{ matrix.architecture }}.tar.gz -C release-assets .
+
+      - name: Upload temporary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.architecture }}
+          path: "*.tar.gz"
+          retention-days: 1
+
+  publish-release:
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./all-binaries
+          merge-multiple: true
+
+      - name: Create Release with GH CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RELEASE_TAG="${{ needs.build-binaries.outputs.upstream_tag }}"
+          
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists. Updating assets."
+          else
+            gh release create "$RELEASE_TAG" \
+              --title "Release $RELEASE_TAG" \
+              --notes "Automated binary release for $RELEASE_TAG built via Docker."
+          fi
+          
+          gh release upload "$RELEASE_TAG" ./all-binaries/*.tar.gz --clobber
