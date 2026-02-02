@@ -1,0 +1,109 @@
+name: Reusable Okta Sync
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Sync Version'
+        default: "0.10.0"
+        required: false
+        type: string
+
+env:
+  COMMIT_MESSAGE: ":robot: adds latest changes from okta sync"
+  GIT_AUTHOR_EMAIL: ${{ github.event.sender.email || format('{0}@{1}.local', github.actor, github.repository_owner) }}
+  GIT_AUTHOR_NAME: ${{ github.actor }}
+  GIT_COMMITTER_EMAIL: eio.automaton@rancher.kitchen
+  GIT_COMMITTER_NAME: EIO Workflow Automaton
+
+jobs:
+  secret-access-request:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    env:
+      BRANCH_NAME_PREFIX: "auto-request/okta-sync"
+      GITHUB_ORG: ${{ github.repository_owner }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            resources.yaml
+            mappings.yaml
+            .yamllint
+            .yamlfmt
+            manifests/resources/Membership/*
+          sparse-checkout-cone-mode: false
+
+      - name: "Read some Secrets"
+        uses: rancher-eio/read-vault-secrets@main
+        with:
+          secrets: |
+            secret/data/github/repo/${{ env.GITHUB_ORG }}/org/okta-sync/credentials authority | OKTA_SERVICE_AUTHORITY ;
+            secret/data/github/repo/${{ env.GITHUB_ORG }}/org/okta-sync/credentials token | OKTA_AUTHORIZATION
+
+      - name: Download eio-okta-sync binary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          mkdir -p bin
+          gh release download "$VERSION" \
+            --repo rancher-eio/okta-sync \
+            --pattern "*-amd64.tar.gz" \
+            --output - | tar -xz -C bin/
+          chmod +x bin/*
+          echo "$(pwd)/bin" >> $GITHUB_PATH
+
+      - name: Set git config
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run eio-okta-sync commands for rancher org
+        if: env.GITHUB_ORG == 'rancher'
+        run: |
+          eio-okta-sync snapshot && \
+          eio-okta-sync generate && \
+          eio-okta-sync make-archive --org rancher && \
+          git ls-files -- manifests/resources/Membership | xargs --no-run-if-empty rm -f && \
+          tar xf resources.tar && \
+          for manifest in manifests/resources/Membership/{rancherbot,rancher-security-bot,suse-okta-operator,rancherio-gh-m}.yaml; do
+            git reset --quiet -- "$manifest"
+            git checkout --quiet -- "$manifest"
+          done
+
+      - name: Run eio-okta-sync commands for rancherlabs org
+        if: env.GITHUB_ORG == 'rancherlabs'
+        run: |
+          eio-okta-sync snapshot && \
+          eio-okta-sync generate  --embed-github-org-name namespace --crossplane-spec-provider-config-ref-name rancherlabs && \
+          eio-okta-sync make-archive --embed-github-org-name namespace --org rancher && \
+          git ls-files -- manifests/resources/Membership | xargs --no-run-if-empty rm -f && \
+          tar xf resources.tar && \
+          for manifest in manifests/resources/Membership/{rancherbot,rancher-security-bot,suse-okta-operator,rancherio-gh-m}.yaml; do
+            git reset --quiet -- "$manifest"
+            git checkout --quiet -- "$manifest"
+          done
+
+      - name: Update and Create PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH_NAME="${BRANCH_NAME_PREFIX}-$(date '+%d%m%Y-%H%M%S')"
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No changes detected. Skipping."
+            exit 0
+          fi
+          git checkout -b "$BRANCH_NAME"
+          git add .
+          git commit -m "Automated commit by GitHub Actions"
+          git push origin "$BRANCH_NAME"
+          gh pr create --base main --head "$BRANCH_NAME" \
+            --title "Automated: Okta sync at $(date '+%d%m%Y-%H%M%S')" \
+            --body "This PR updates the resources from the Okta data."
