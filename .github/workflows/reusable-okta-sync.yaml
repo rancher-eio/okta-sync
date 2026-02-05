@@ -101,7 +101,7 @@ jobs:
             exit 0
           fi
           git checkout -b "$BRANCH_NAME"
-          git add .
+          git add manifests/resources/Membership/
           git commit -m "Automated commit by GitHub Actions"
           git push origin "$BRANCH_NAME"
           gh pr create --base main --head "$BRANCH_NAME" \
