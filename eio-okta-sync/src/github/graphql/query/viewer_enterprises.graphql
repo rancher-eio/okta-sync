@@ -1,0 +1,20 @@
+query Query(
+  $first:Int=100,
+  $after:String,
+) {
+  viewer {
+    enterprises(first:$first,after:$after) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        databaseId
+        id
+        name
+        slug
+        viewerIsAdmin
+      }
+    }
+  }
+}

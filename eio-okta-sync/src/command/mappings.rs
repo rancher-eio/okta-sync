@@ -331,7 +331,7 @@ fn quiz_group_id(groups: &[OktaGroupExpectation], rng: &mut impl Rng) -> Result<
   let groups = groups.iter().map(QuizItemGroupId).collect_vec();
 
   let amount = 5.min(groups.len());
-  let examples = groups.choose_multiple(rng, amount).collect_vec();
+  let examples = groups.sample(rng, amount).collect_vec();
 
   match examples.choose(rng) {
     Some(expected) => {
@@ -364,7 +364,7 @@ fn quiz_group_name(groups: &[OktaGroupExpectation], rng: &mut impl Rng) -> Resul
   let groups = groups.iter().map(QuizItemGroupName).collect_vec();
 
   let amount = 5.min(groups.len());
-  let examples = groups.choose_multiple(rng, amount).collect_vec();
+  let examples = groups.sample(rng, amount).collect_vec();
 
   match examples.choose(rng) {
     Some(expected) => {

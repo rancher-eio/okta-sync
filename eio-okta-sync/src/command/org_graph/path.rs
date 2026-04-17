@@ -9,7 +9,6 @@ use crate::okta::{DisplayName, Snapshot, graph::Org};
 #[remain::sorted]
 #[rustfmt::skip]
 #[command(about = "find path to user(s) in Okta snapshot")]
-
 pub struct Command {
   #[arg(
     long,

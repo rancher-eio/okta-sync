@@ -1,0 +1,19 @@
+query Query(
+  $enterprise:String!,
+  $first:Int=100,
+  $after:String,
+) {
+  enterprise(slug:$enterprise) {
+    organizations(first:$first,after:$after) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        databaseId
+        id
+        login
+      }
+    }
+  }
+}

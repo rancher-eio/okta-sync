@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- (DEPENDENCY) eio-okta-api 0.6.0 -> 0.6.1
+
 ## 0.4.1
 
 - (DEPENDENCY) eio-okta-api 0.5.0 -> 0.6.0

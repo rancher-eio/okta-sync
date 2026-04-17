@@ -1,0 +1,34 @@
+
+query Query(
+  $enterprise:String!,
+  $first:Int=100,
+  $after:String,
+) {
+  enterprise(slug:$enterprise) {
+    members(first:$first,after:$after) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        __typename
+        ... on EnterpriseUserAccount {
+          id
+          login
+          user {
+            databaseId
+            email
+            id
+            login
+          }
+        }
+        ... on User {
+          databaseId
+          email
+          id
+          login
+        }
+      }
+    }
+  }
+}

@@ -41,17 +41,27 @@ pub struct Command {
   enterprise: String,
   #[arg(
     long,
+    value_name    = "BOOL",
+    default_value = "true",
+    action        = clap::ArgAction::Set,
+    help          = "include roots"
+  )]
+  inclusive: bool,
+  #[arg(
+    long,
     value_name    = "SLUG",
     default_value = "rancher",
     help          = "the name of the org to use",
   )]
   org: String,
   #[arg(
-    long,
-    value_name = "OKTA-ID",
-    help       = "find okta users starting from (but not including) this user (defaults to top of org)",
+    alias           = "root",
+    long            = "roots",
+    value_delimiter = ',',
+    value_name      = "[OKTA-ID,...]",
+    help            = "find okta users starting from (but not including) this user or users (defaults to top of org)",
   )]
-  root: Option<String>,
+  roots: Vec<String>,
   #[arg(
     long,
     value_name = "PATH",
@@ -95,9 +105,10 @@ impl Command {
       create_missing,
       dry_run,
       enterprise,
+      inclusive,
       token,
       org,
-      root,
+      roots,
       snapshot,
       strict,
       team_id,
@@ -157,29 +168,47 @@ impl Command {
 
     eprintln!("org graph contains {} users", okta_org.hierarchy.node_count());
 
-    let root_id = root.unwrap_or_else(|| {
-      eprintln!("no root given, defaulting to top of org");
-      okta_org.hierarchy.from_index(0).to_owned()
-    });
+    let okta_users = {
+      let root_ids: BTreeSet<String> = if roots.is_empty() {
+        eprintln!("no root given, defaulting to top of org");
+        [okta_org.hierarchy.from_index(0).to_owned()].into_iter().collect()
+      } else {
+        roots.into_iter().collect()
+      };
 
-    let root = okta_org
-      .user(&root_id)
-      .expect(&format!("failed to find user in org graph with ID '{root_id}'"));
+      let mut roots = Vec::new();
 
-    eprintln!(
-      "finding users in org graph from user '{}' ({})...",
-      &root.id,
-      root.display_name()
-    );
+      for root_id in root_ids {
+        let root = okta_org
+          .user(&root_id)
+          .unwrap_or_else(|| panic!("failed to find user in org graph with ID '{root_id}'"));
 
-    let okta_users = okta_org
-      .below(&root.id)
-      .iter()
-      .flat_map(|id| okta_org.user(id))
-      .flat_map(|user| user.profile.extensions_into::<UserProfileExtensions>().ok())
-      .flat_map(|profile| profile.github_username.unwrap_or_default())
-      .map(|username| username.trim().to_lowercase())
-      .collect::<BTreeSet<String>>();
+        roots.push(root);
+      }
+
+      let mut okta_users = BTreeSet::new();
+
+      for root in roots {
+        if inclusive {
+          okta_users.insert(root.id.as_str());
+        }
+        eprintln!(
+          "finding users in org graph from user '{}' ({})...",
+          &root.id,
+          root.display_name()
+        );
+
+        okta_users.extend(okta_org.below(&root.id));
+      }
+
+      okta_users
+        .iter()
+        .flat_map(|id| okta_org.user(id))
+        .flat_map(|user| user.profile.extensions_into::<UserProfileExtensions>().ok())
+        .flat_map(|profile| profile.github_username.unwrap_or_default())
+        .map(|username| username.trim().to_lowercase())
+        .collect::<BTreeSet<String>>()
+    };
 
     eprintln!("found {} GitHub usernames in relevant Okta profiles", okta_users.len());
 

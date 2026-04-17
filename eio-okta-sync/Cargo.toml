@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-sync"
-version = "0.10.0"
+version = "0.11.0"
 description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
 rust-version.workspace = true
 edition.workspace = true
@@ -74,7 +74,8 @@ update-informer = { workspace = true, features = [
 ] }
 uuid = { workspace = true, features = ["std", "serde"] }
 
-octocrab = "0.48.1"
+graphql_client = "0.16.0"
+octocrab = "0.49.7"
 rand.workspace = true
 
 [[bench]]

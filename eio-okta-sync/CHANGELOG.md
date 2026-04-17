@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.11.0
+
+- (FEATURE) "enterprise member invite" can invite unaffiliated members of an Enterprise, which do not consume a seat, useful for granting license entitlements without org assignment.
+- (ENHANCEMENT) "enterprise team assign-members" now allows multiple roots to the graph search, enabling support for multi-headed orgs.
+- (ENHANCEMENT) "enterprise team assign-members" now has a `--inclusive` option that will include the roots, enabling support for adding single users, among other uses.
+- (LIBRARY/INTERNAL) experimental GraphQL support, including pagination support, helper macros to simplify implementation, etc. Intended to be exposed in the public API eventually.
+- (INTERNAL) fixed all outstanding clippy lints
+- (DEPENDENCY/NEW) added graphql_client
+- (DEPENDENCY) eio-okta-api 0.6.0 -> 0.6.1
+- (DEPENDENCY) eio-okta-client 0.4.1 -> 0.4.2
+- (DEPENDENCY) eio-okta-data 0.5.0 -> 0.5.1
+- (DEPENDENCY) fancy-regex 0.16.1 -> 0.17.0
+- (DEPENDENCY) octocrab 0.48.1 -> 0.49.7
+- (DEPENDENCY) rand 0.9.2 -> 0.10.0
+
 ## 0.10.0
 
 - (FEATURE) "enterprise team assign-members" now has a `--strict` option (off by default). Enabling this will not only add missing users to the team, but remove ones that are not in the set of expected users.

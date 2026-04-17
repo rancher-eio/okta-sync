@@ -29,7 +29,7 @@ impl<'users> Org<'users> {
   pub(crate) fn above(&self, user: &'users str) -> Vec<&'users str> {
     self
       .hierarchy
-      .neighbors_directed(&user, Direction::Incoming)
+      .neighbors_directed(user, Direction::Incoming)
       .fold(Vec::new(), |mut management, manager| {
         management.extend(self.above(manager));
         management.push(manager);
@@ -90,7 +90,7 @@ impl<'users> Org<'users> {
     let users = self
       .users
       .iter()
-      .filter(|user| user.direct_reports(&self.users).is_empty())
+      .filter(|user| user.direct_reports(self.users).is_empty())
       .collect_vec();
 
     for user in users {
@@ -106,7 +106,7 @@ impl<'users> Org<'users> {
     self.user_id_cache.insert(node_b, user);
 
     if !user.is_own_manager()
-      && let Some(manager) = user.manager(&self.users)
+      && let Some(manager) = user.manager(self.users)
     {
       let node_a = self.add_ascending(manager);
       self.hierarchy.add_edge(node_a, node_b, Default::default());

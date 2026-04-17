@@ -1,0 +1,31 @@
+mutation Mutation(
+  $clientMutationId: String,
+  $email: String,
+  $enterpriseId: ID!,
+  $invitee: String,
+) {
+  inviteEnterpriseMember(input: {
+    clientMutationId: $clientMutationId,
+    email: $email,
+    enterpriseId: $enterpriseId,
+    invitee: $invitee,
+  }) {
+    clientMutationId
+    invitation {
+      email
+      id
+      invitee {
+        databaseId
+        email
+        id
+        login
+      }
+      inviter {
+        databaseId
+        email
+        id
+        login
+      }
+    }
+  }
+}

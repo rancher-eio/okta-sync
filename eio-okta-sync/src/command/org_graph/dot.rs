@@ -8,7 +8,6 @@ use crate::okta::{Snapshot, graph::Org};
 #[remain::sorted]
 #[rustfmt::skip]
 #[command(about = "generate DOT graph from Okta snapshot")]
-
 pub struct Command {
   #[arg(
     long,

@@ -1,4 +1,5 @@
 pub(crate) mod enterprise;
+pub(crate) mod graphql;
 pub mod membership;
 pub mod team;
 pub mod team_membership;

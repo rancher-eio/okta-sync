@@ -1,0 +1,10 @@
+query Query(
+  $enterprise:String!,
+) {
+  enterprise(slug:$enterprise) {
+    databaseId
+    id
+    name
+    viewerIsAdmin
+  }
+}

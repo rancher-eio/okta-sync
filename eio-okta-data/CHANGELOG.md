@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- (DEPENDENCY) fake 4.4.0 -> 5.1.0
+- (DEPENDENCY) proptest_derive 0.7.0 -> 0.8.0
+- (DEPENDENCY) rand 0.9.2 -> 0.10.0
+- (DEPENDENCY) strum 0.27.2 -> 0.28.0
+
 ## 0.5.0
 
 - (BREAKING) replaced `derive_builder` with `bon`

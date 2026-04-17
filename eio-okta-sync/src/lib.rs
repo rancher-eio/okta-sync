@@ -3,7 +3,9 @@
 pub mod command;
 pub mod crossplane;
 pub mod github;
+pub(crate) mod graphql;
 pub mod kubernetes;
+pub(crate) mod macros;
 pub mod okta;
 
 #[derive(Debug, thiserror::Error, miette::Diagnostic)]

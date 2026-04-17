@@ -126,27 +126,26 @@ impl Command {
 
     for resource in resources.iter_mut() {
       let Resource { kind, metadata, .. } = resource;
-      if kind.as_str().eq(target.as_ref()) {
-        if let Some(org_name) = embedded.org(metadata) {
-          if org == org_name {
-            if strip_namespaces {
-              metadata.namespace = None;
-            }
-            let name = embedded.name(metadata);
-            let path = Utf8PathBuf::from(format!("manifests/resources/{kind}/{name}.yaml"));
-            let mut header = Header::new_gnu();
-            header.set_mode(DEFAULT_MODE);
-            let mut entry = archive.append_writer(&mut header, path)?;
-            if force_yaml_start_of_document {
-              entry.write_all(YAML_START_OF_DOCUMENT.as_bytes())?;
-            }
-            serde_yml::to_writer(&mut entry, &resource)?;
-            if force_yaml_end_of_document {
-              entry.write_all(YAML_END_OF_DOCUMENT.as_bytes())?;
-            }
-            entry.finish()?;
-          }
+      if kind.as_str().eq(target.as_ref())
+        && let Some(org_name) = embedded.org(metadata)
+        && org == org_name
+      {
+        if strip_namespaces {
+          metadata.namespace = None;
         }
+        let name = embedded.name(metadata);
+        let path = Utf8PathBuf::from(format!("manifests/resources/{kind}/{name}.yaml"));
+        let mut header = Header::new_gnu();
+        header.set_mode(DEFAULT_MODE);
+        let mut entry = archive.append_writer(&mut header, path)?;
+        if force_yaml_start_of_document {
+          entry.write_all(YAML_START_OF_DOCUMENT.as_bytes())?;
+        }
+        serde_yml::to_writer(&mut entry, &resource)?;
+        if force_yaml_end_of_document {
+          entry.write_all(YAML_END_OF_DOCUMENT.as_bytes())?;
+        }
+        entry.finish()?;
       }
     }
 

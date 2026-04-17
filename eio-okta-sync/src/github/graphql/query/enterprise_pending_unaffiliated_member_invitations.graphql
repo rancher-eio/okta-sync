@@ -1,0 +1,37 @@
+query Query(
+  $enterprise:String!,
+  $first:Int=100,
+  $after:String,
+) {
+  enterprise(slug:$enterprise) {
+    ownerInfo {
+      pendingUnaffiliatedMemberInvitations(first:$first,after:$after) {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          email
+          enterprise {
+            databaseId
+            id
+            slug
+          }
+          id
+          invitee {
+            databaseId
+            email
+            id
+            login
+          }
+          inviter {
+            databaseId
+            email
+            id
+            login
+          }
+        }
+      }
+    }
+  }
+}

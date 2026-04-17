@@ -433,7 +433,7 @@ impl Command {
         let org = Org::new(&snapshot.users).populate_descending();
 
         for okta_id in &mappings.include_org_tree.below_okta_ids {
-          let tree = &org.below(&okta_id);
+          let tree = &org.below(okta_id);
 
           eprintln!("Including {} Users in Org Tree: {}", tree.len(), okta_id);
 
