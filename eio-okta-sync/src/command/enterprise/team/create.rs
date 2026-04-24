@@ -49,31 +49,15 @@ impl Command {
     } = self;
 
     let github = Octocrab::builder().personal_token(token).build()?;
-
-    let result = match description {
-      Some(desc) => {
-        github
-          .enterprise(&enterprise_slug)
-          .teams()
-          .create(&name)
-          .description(desc)
-          .organization_selection_type(OrganizationSelectionType::Selected)
-          .build()
-          .send()
-          .await?
-      }
-      None => {
-        github
-          .enterprise(&enterprise_slug)
-          .teams()
-          .create(&name)
-          .organization_selection_type(OrganizationSelectionType::Selected)
-          .build()
-          .send()
-          .await?
-      }
-    };
-
+    let result = github
+      .enterprise(&enterprise_slug)
+      .teams()
+      .create(&name)
+      .maybe_description(description)
+      .organization_selection_type(OrganizationSelectionType::Selected)
+      .build()
+      .send()
+      .await?;
     let json = serde_json::to_string_pretty(&result)?;
     println!("{json}");
 
