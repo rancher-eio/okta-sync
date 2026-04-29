@@ -4,7 +4,7 @@ pub mod query {
   #![allow(dead_code)]
   use std::result::Result;
   pub const OPERATION_NAME: &str = "Query";
-  pub const QUERY : & str = "query Query(\n  $enterprise:String!,\n  $first:Int=100,\n  $after:String,\n) {\n  enterprise(slug:$enterprise) {\n    ownerInfo {\n      pendingUnaffiliatedMemberInvitations(first:$first,after:$after) {\n        pageInfo {\n          endCursor\n          hasNextPage\n        }\n        nodes {\n          email\n          enterprise {\n            databaseId\n            id\n            slug\n          }\n          id\n          invitee {\n            databaseId\n            email\n            id\n            login\n          }\n          inviter {\n            databaseId\n            email\n            id\n            login\n          }\n        }\n      }\n    }\n  }\n}\n" ;
+  pub const QUERY : & str = "query Query(\n  $enterpriseSlug:String!,\n  $first:Int=100,\n  $after:String,\n) {\n  enterprise(slug:$enterpriseSlug) {\n    ownerInfo {\n      pendingUnaffiliatedMemberInvitations(first:$first,after:$after) {\n        pageInfo {\n          endCursor\n          hasNextPage\n        }\n        nodes {\n          email\n          enterprise {\n            databaseId\n            id\n            slug\n          }\n          id\n          invitee {\n            databaseId\n            email\n            id\n            login\n          }\n          inviter {\n            databaseId\n            email\n            id\n            login\n          }\n        }\n      }\n    }\n  }\n}\n" ;
   use super::*;
   use serde::{Deserialize, Serialize};
   #[allow(dead_code)]
@@ -18,7 +18,8 @@ pub mod query {
   #[derive(Serialize, Debug, Clone, PartialEq, Eq, Hash, Deserialize, bon :: Builder)]
   #[serde(crate = ":: serde")]
   pub struct Variables {
-    pub enterprise: String,
+    #[serde(rename = "enterpriseSlug")]
+    pub enterprise_slug: String,
     pub first: Option<Int>,
     pub after: Option<String>,
   }

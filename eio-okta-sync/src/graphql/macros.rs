@@ -136,3 +136,42 @@ macro_rules! ForwardPagination {
 }
 
 pub(crate) use ForwardPagination;
+
+macro_rules! Builder {
+  ($T:path => {
+    type Builder = $Builder:path;
+  }) => {
+    const _: () = {
+      use crate::graphql::Builder;
+
+      impl Builder for $T {
+        type Builder = $Builder;
+
+        fn builder() -> Self::Builder {
+          Self::builder()
+        }
+      }
+    };
+  };
+
+  (Variables in $($NAMESPACE:tt)+) => {
+    const _: () = {
+      use $($NAMESPACE)+::*;
+      crate::graphql::macros::Builder!(
+        Variables => {
+          type Builder = VariablesBuilder;
+        }
+      );
+    };
+  };
+
+  (Variables) => {
+    crate::graphql::macros::Builder!(
+      Variables => {
+        type Builder = VariablesBuilder;
+      }
+    );
+  }
+}
+
+pub(crate) use Builder;

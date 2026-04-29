@@ -1,5 +1,28 @@
 # Changelog
 
+- (FEATURE) "enterprise member(s)" has several new subcommands:
+  - (FEATURE) "cancel-invitation" can (unsurprisingly) cancel a pending invitation.
+  - (FEATURE) "list" can list current enterprise members.
+  - (FEATURE) "remove" can remove a user from the enterprise.
+  - (FEATURE) "pending" can list pending enterprise invitations.
+    - (FEATURE) "administrators" lists invitations to the enterprise as admins or billing managers.
+    - (FEATURE) "affiliated" lists invitations to orgs in the enterprise.
+    - (FEATURE) "unaffiliated" lists invitations to the enterprise without org membership.
+    - (FEATURE) "collaborators" lists invitationes for outside collaborators to repositories across the enterprise.
+- (FEATURE) "enterprise organization list" can list orgs within the enterprise.
+- (ENHANCEMENT) "enterprise member invite" now accepts `--enterprise-slug` or `--enterprise-id` (which can save an API call).
+- (ENHANCEMENT) most "enterprise" subcommands now accept both plural and singular forms (example: "member list" or "members list" are equivalent).
+- (BUGFIX) "enterprise member invite" now has more accurate help text.
+- (BUGFIX/SECURITY) help text no longer includes the value of GITHUB_TOKEN if present in the environment. :facepalm:
+- (LIB/ENHANCEMENT) all errors now have diagnostic codes.
+- (INTERNAL) args::github::Token ensures consistency and improves security (wipes memory when dropped).
+- (INTERNAL) args::github includes reusable argument groups that encapsulates the pattern of "prefer an ID but allow a more human-friendly alternative".
+- (INTERNAL) reworked graphql pagination a bit (inverted control, improved developer experience).
+- (INTERNAL) modified graphql types to reuse similar ones from `graphql_client` crate.
+- (INTERNAL) exposed variable builders on query types, more ergonomic, better type inference.
+- (INTERNAL) removed fallback variants from query fragments in favour of deserialization failures on unexpected variants (which is probably a query bug if it happens).
+- (DEPENDENCY/NEW) added secrecy
+
 ## 0.11.0
 
 - (FEATURE) "enterprise member invite" can invite unaffiliated members of an Enterprise, which do not consume a seat, useful for granting license entitlements without org assignment.
@@ -153,6 +176,7 @@
 | Tag                | Description
 |--------------------|------------
 | BUGFIX             | something was wrong before, and now it isn't.
+| BUGFIX/SECURITY    | something was less secure before, and now it's more secure.
 | ENHANCEMENT        | something worked before, but now it works _better_.
 | DEPENDENCY/ADD     | added a dependency to this crate that is already used in the project.
 | DEPENDENCY/NEW     | added a dependency to the project.

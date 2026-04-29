@@ -5,7 +5,7 @@ query Query(
 ) {
   enterprise(slug:$enterpriseSlug) {
     ownerInfo {
-      pendingUnaffiliatedMemberInvitations(first:$first,after:$after) {
+      pendingAdminInvitations(first:$first,after:$after) {
         pageInfo {
           endCursor
           hasNextPage

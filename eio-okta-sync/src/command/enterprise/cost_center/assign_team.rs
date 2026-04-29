@@ -53,13 +53,8 @@ pub struct Command {
     help       = "name of Enterprise Team to assign users from",
   )]
   team: String,
-  #[arg(
-    env        = "GITHUB_TOKEN",
-    long       = "token",
-    value_name = "TOKEN",
-    help       = "GitHub Access Token",
-  )]
-  token: String,
+  #[command(flatten)]
+  token: crate::args::github::Token,
 }
 
 impl Command {

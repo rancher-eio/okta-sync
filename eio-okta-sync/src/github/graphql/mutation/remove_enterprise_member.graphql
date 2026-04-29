@@ -1,0 +1,24 @@
+mutation Mutation(
+  $clientMutationId: String,
+  $enterpriseId: ID!,
+  $userId: ID!,
+) {
+  removeEnterpriseMember(input: {
+    clientMutationId:$clientMutationId,
+    enterpriseId:$enterpriseId,
+    userId:$userId,
+  }) {
+    clientMutationId
+    enterprise {
+      databaseId
+      id
+      slug
+    }
+    user {
+      databaseId
+      email
+      id
+      login
+    }
+  }
+}

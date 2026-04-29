@@ -1,0 +1,32 @@
+mutation Mutation(
+  $clientMutationId: String,
+  $invitationId: ID!,
+) {
+  cancelEnterpriseMemberInvitation(input: {
+    clientMutationId: $clientMutationId,
+    invitationId: $invitationId,
+  }) {
+    clientMutationId
+    invitation {
+      email
+      enterprise {
+        databaseId
+        id
+        slug
+      }
+      id
+      invitee {
+        databaseId
+        email
+        id
+        login
+      }
+      inviter {
+        databaseId
+        email
+        id
+        login
+      }
+    }
+  }
+}

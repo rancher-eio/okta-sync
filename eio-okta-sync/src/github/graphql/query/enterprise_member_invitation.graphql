@@ -1,0 +1,29 @@
+query Query(
+  $enterpriseSlug: String!,
+  $userLogin: String!,
+) {
+  enterpriseMemberInvitation(
+    enterpriseSlug: $enterpriseSlug,
+    userLogin: $userLogin,
+  ) {
+    email
+    enterprise {
+      databaseId
+      id
+      slug
+    }
+    id
+    invitee {
+      databaseId
+      email
+      id
+      login
+    }
+    inviter {
+      databaseId
+      email
+      id
+      login
+    }
+  }
+}

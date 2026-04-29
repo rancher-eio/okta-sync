@@ -1015,6 +1015,7 @@ dependencies = [
  "petgraph",
  "rand 0.10.1",
  "remain",
+ "secrecy",
  "semver",
  "serde",
  "serde_json",

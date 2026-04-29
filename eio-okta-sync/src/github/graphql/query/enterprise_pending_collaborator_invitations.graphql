@@ -1,0 +1,56 @@
+query Query(
+  $enterpriseSlug:String!,
+  $first:Int=100,
+  $after:String,
+) {
+  enterprise(slug:$enterpriseSlug) {
+    ownerInfo {
+      pendingCollaboratorInvitations(first:$first,after:$after) {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          email
+          id
+          invitee {
+            databaseId
+            email
+            id
+            login
+          }
+          inviter {
+            databaseId
+            email
+            id
+            login
+          }
+          permission
+          repository {
+            __typename
+            ... on Repository {
+              databaseId
+              id
+              name
+              owner {
+                __typename
+                ... on Organization {
+                  databaseId
+                  id
+                  login
+                }
+                ... on User {
+                  databaseId
+                  email
+                  id
+                  login
+                }
+              }
+              visibility
+            }
+          }
+        }
+      }
+    }
+  }
+}

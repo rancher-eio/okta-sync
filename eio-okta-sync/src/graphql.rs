@@ -1,7 +1,4 @@
-#![allow(unused)]
-
 use graphql_client::GraphQLQuery;
-use serde_json::{Map, Number, Value};
 
 pub(crate) mod macros;
 pub(crate) use macros::*;
@@ -15,28 +12,7 @@ pub(crate) struct MultiPageResponse<T> {
 pub(crate) struct SinglePageResponse<T> {
   pub data: T,
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub errors: Option<Vec<Error>>,
-}
-
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-pub(crate) struct Error {
-  pub path: Vec<ErrorPathSegment>,
-  pub extensions: Option<Map<String, Value>>,
-  pub locations: Vec<ErrorLocation>,
-  pub message: String,
-}
-
-#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
-pub(crate) struct ErrorLocation {
-  pub line: usize,
-  pub column: usize,
-}
-
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-#[serde(untagged)]
-pub enum ErrorPathSegment {
-  String(String),
-  Number(Number),
+  pub errors: Option<Vec<graphql_client::Error>>,
 }
 
 pub(crate) trait PageInfo {
@@ -103,38 +79,6 @@ where
   }
 }
 
-pub(crate) trait OnePage {
-  async fn graphql_one_page<T: GraphQLQuery>(
-    &self,
-    variables: T::Variables,
-  ) -> Result<SinglePageResponse<T::ResponseData>, crate::Error>;
-}
-
-pub(crate) trait AllPagesForward: OnePage {
-  async fn graphql_all_pages_forward<T: GraphQLQuery + PageForward + PageSize>(
-    &self,
-    mut variables: T::Variables,
-  ) -> Result<MultiPageResponse<T::ResponseData>, crate::Error>
-  where
-    T::Variables: ForwardPageVariables + Clone,
-  {
-    T::enforce(variables.first());
-
-    let mut pages = Vec::new();
-    let mut next = true;
-
-    while next {
-      let response = self.graphql_one_page::<T>(variables.clone()).await?;
-      next = T::page_forward(&mut variables, &response.data);
-      pages.push(response);
-    }
-
-    Ok(MultiPageResponse { pages })
-  }
-}
-
-impl<T> AllPagesForward for T where T: OnePage {}
-
 impl<T> IntoIterator for SinglePageResponse<T>
 where
   T: IntoIterator,
@@ -190,5 +134,76 @@ where
       .flat_map(|page| page.into_iter().collect::<Vec<_>>())
       .collect::<Vec<_>>()
       .into_iter()
+  }
+}
+
+pub(crate) trait Builder {
+  type Builder;
+
+  fn builder() -> Self::Builder;
+}
+
+pub(crate) trait Variables: GraphQLQuery
+where
+  Self::Variables: Builder,
+{
+  fn variables() -> <Self::Variables as Builder>::Builder {
+    Self::Variables::builder()
+  }
+}
+
+impl<T: GraphQLQuery> Variables for T where T::Variables: Builder {}
+
+pub(crate) trait ExecuteQuery: GraphQLQuery {
+  async fn execute_query(
+    variables: Self::Variables,
+    client: &octocrab::Octocrab,
+  ) -> octocrab::Result<SinglePageResponse<Self::ResponseData>> {
+    let payload = Self::build_query(variables);
+    client.graphql(&payload).await
+  }
+}
+
+impl<T: GraphQLQuery> ExecuteQuery for T {}
+
+pub(crate) trait Direction {}
+
+pub(crate) enum Forward {}
+
+impl Direction for Forward {}
+
+pub(crate) trait PaginateQuery<D: Direction = Forward>: ExecuteQuery
+where
+  Self::ResponseData: PageInfo,
+{
+  async fn paginate_query(
+    variables: Self::Variables,
+    client: &octocrab::Octocrab,
+  ) -> octocrab::Result<MultiPageResponse<Self::ResponseData>>;
+}
+
+impl<T> PaginateQuery<Forward> for T
+where
+  T: GraphQLQuery + ExecuteQuery + PageSize,
+  T::ResponseData: PageInfo,
+  <T::ResponseData as PageInfo>::PageInfo: ForwardPageInfo,
+  T::Variables: ForwardPageVariables + Clone,
+{
+  async fn paginate_query(
+    mut variables: Self::Variables,
+    client: &octocrab::Octocrab,
+  ) -> octocrab::Result<MultiPageResponse<Self::ResponseData>> {
+    T::enforce(variables.first());
+
+    let mut pages = Vec::new();
+    let mut next = true;
+
+    while next {
+      let response = Self::execute_query(variables.clone(), client).await?;
+      next = T::page_forward(&mut variables, &response.data);
+      pages.push(response);
+    }
+
+    Ok(MultiPageResponse { pages })
   }
 }

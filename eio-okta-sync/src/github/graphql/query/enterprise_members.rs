@@ -4,7 +4,7 @@ pub mod query {
   #![allow(dead_code)]
   use std::result::Result;
   pub const OPERATION_NAME: &str = "Query";
-  pub const QUERY : & str = "\nquery Query(\n  $enterprise:String!,\n  $first:Int=100,\n  $after:String,\n) {\n  enterprise(slug:$enterprise) {\n    members(first:$first,after:$after) {\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n      nodes {\n        __typename\n        ... on EnterpriseUserAccount {\n          id\n          login\n          user {\n            databaseId\n            email\n            id\n            login\n          }\n        }\n        ... on User {\n          databaseId\n          email\n          id\n          login\n        }\n      }\n    }\n  }\n}\n" ;
+  pub const QUERY : & str = "\nquery Query(\n  $enterpriseSlug:String!,\n  $first:Int=100,\n  $after:String,\n) {\n  enterprise(slug:$enterpriseSlug) {\n    members(first:$first,after:$after) {\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n      nodes {\n        __typename\n        ... on EnterpriseUserAccount {\n          id\n          login\n          user {\n            databaseId\n            email\n            id\n            login\n          }\n        }\n        ... on User {\n          databaseId\n          email\n          id\n          login\n        }\n      }\n    }\n  }\n}\n" ;
   use super::*;
   use serde::{Deserialize, Serialize};
   #[allow(dead_code)]
@@ -18,7 +18,8 @@ pub mod query {
   #[derive(Serialize, Debug, Clone, PartialEq, Eq, Hash, Deserialize, bon :: Builder)]
   #[serde(crate = ":: serde")]
   pub struct Variables {
-    pub enterprise: String,
+    #[serde(rename = "enterpriseSlug")]
+    pub enterprise_slug: String,
     pub first: Option<Int>,
     pub after: Option<String>,
   }
@@ -57,8 +58,6 @@ pub mod query {
   pub enum QueryEnterpriseMembersNodes {
     EnterpriseUserAccount(QueryEnterpriseMembersNodesOnEnterpriseUserAccount),
     User(QueryEnterpriseMembersNodesOnUser),
-    #[serde(other)]
-    Unknown,
   }
   #[derive(Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
   #[serde(crate = ":: serde")]

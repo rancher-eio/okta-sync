@@ -1,9 +1,9 @@
 query Query(
-  $enterprise:String!,
+  $enterpriseSlug:String!,
   $first:Int=100,
   $after:String,
 ) {
-  enterprise(slug:$enterprise) {
+  enterprise(slug:$enterpriseSlug) {
     organizations(first:$first,after:$after) {
       pageInfo {
         endCursor

@@ -1,0 +1,8 @@
+query Query($userLogin:String!) {
+  user(login:$userLogin) {
+    databaseId
+    email
+    id
+    login
+  }
+}
