@@ -95,15 +95,46 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          BRANCH_NAME="${BRANCH_NAME_PREFIX}-$(date '+%d%m%Y-%H%M%S')"
           if [[ -z "$(git status --porcelain)" ]]; then
             echo "No changes detected. Skipping."
             exit 0
           fi
-          git checkout -b "$BRANCH_NAME"
-          git add manifests/resources/Membership/
-          git commit -m "Automated commit by GitHub Actions"
-          git push origin "$BRANCH_NAME"
-          gh pr create --base main --head "$BRANCH_NAME" \
-            --title "Automated: Okta sync at $(date '+%d%m%Y-%H%M%S')" \
-            --body "This PR updates the resources from the Okta data."
+
+          TIMESTAMP="$(date '+%d%m%Y-%H%M%S')"
+
+          # Check for an existing open PR whose head branch starts with the prefix
+          EXISTING_PR="$(gh pr list \
+            --base main \
+            --state open \
+            --search "head:${BRANCH_NAME_PREFIX}" \
+            --json number,headRefName \
+            | jq -r \
+              --arg prefix "${BRANCH_NAME_PREFIX}" \
+              'map(select(.headRefName | startswith($prefix))) | first | .headRefName // ""')"
+
+          if [[ -n "$EXISTING_PR" ]]; then
+            echo "Found existing open PR on branch '${EXISTING_PR}'. Reusing it."
+            # Save the updated manifests before switching branches
+            mkdir -p /tmp/membership-changes/
+            cp -r manifests/resources/Membership/ /tmp/membership-changes/
+            git fetch origin "${EXISTING_PR}"
+            git checkout -B "${EXISTING_PR}" "origin/${EXISTING_PR}"
+            cp -r /tmp/membership-changes/. manifests/resources/Membership/
+            git add manifests/resources/Membership/
+            if git diff --cached --quiet; then
+              echo "No new changes relative to the existing PR branch. Skipping commit."
+            else
+              git commit -m "Automated commit by GitHub Actions (updated sync at ${TIMESTAMP})"
+              git push origin "${EXISTING_PR}"
+            fi
+          else
+            BRANCH_NAME="${BRANCH_NAME_PREFIX}-${TIMESTAMP}"
+            echo "No existing open PR found. Creating new branch '${BRANCH_NAME}'."
+            git checkout -b "$BRANCH_NAME"
+            git add manifests/resources/Membership/
+            git commit -m "Automated commit by GitHub Actions"
+            git push origin "$BRANCH_NAME"
+            gh pr create --base main --head "$BRANCH_NAME" \
+              --title "Automated: Okta sync at ${TIMESTAMP}" \
+              --body "This PR updates the resources from the Okta data."
+          fi
