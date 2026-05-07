@@ -15,14 +15,8 @@ pub struct Command {
     help          = "the name enterprise to use"
   )]
   enterprise_slug: String,
-  #[arg(
-    env        = "GITHUB_TOKEN",
-    long       = "token",
-    value_name = "TOKEN",
-    help       = "GitHub Access Token",
-    hide_env_values = true,
-  )]
-  token: String,
+  #[command(flatten)]
+  token: crate::args::github::Token,
 }
 
 impl Command {

@@ -1,5 +1,5 @@
-use crate::github::enterprise::models::OrganizationSelectionType;
 use crate::github::Enterprise;
+use crate::github::enterprise::models::OrganizationSelectionType;
 use octocrab::Octocrab;
 
 #[derive(Debug, clap::Parser)]
@@ -29,14 +29,8 @@ pub struct Command {
   )]
   name: String,
 
-  #[arg(
-    env        = "GITHUB_TOKEN",
-    long       = "token",
-    value_name = "TOKEN",
-    help       = "GitHub Access Token",
-    hide_env_values = true,
-  )]
-  token: String,
+  #[command(flatten)]
+  token: crate::args::github::Token,
 }
 
 impl Command {

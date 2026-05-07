@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.13.0
+
 - (FEATURE) "enterprise member(s)" has several new subcommands:
   - (FEATURE) "cancel-invitation" can (unsurprisingly) cancel a pending invitation.
   - (FEATURE) "list" can list current enterprise members.
