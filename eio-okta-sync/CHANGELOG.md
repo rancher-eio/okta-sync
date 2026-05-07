@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.12.0
+
+- (CALLOUT) thanks to @ivan-claire for their first major contribution, which is... everything in this release!
+- (FEATURE) "enterprise team ..." has a bunch of new commands for managing enterprise teams:
+  - (FEATURE) "enterprise team create" creates a team...
+  - (FEATURE) "enterprise team delete" deletes a team...
+  - (FEATURE) "enterprise team get" returns information about a team.
+  - (FEATURE) "enterprise team list" lists current teams.
+  - (FEATURE) "enterprise team member ..." handles members.
+  - (FEATURE) "enterprise team member add" adds a user to a team.
+  - (FEATURE) "enterprise team member bulk-add" adds many users to a team at once.
+  - (FEATURE) "enterprise team member bulk-remove" removes many users from a team at once./
+  - (FEATURE) "enterprise team member list" lists the members of a team.
+  - (FEATURE) "enterprise team member remove" removes a user from a team.
+  - (FEATURE) "enterprise team organization ..." handles org assigments.
+  - (FEATURE) "enterprise team organization add" assigns an org to a team.
+  - (FEATURE) "enterprise team organization bulk-add" assigns many orgs to a team at once.
+  - (FEATURE) "enterprise team organization bulk-remove" removes many orgs from a team at once.
+  - (FEATURE) "enterprise team organization list" lists orgs currently assigned to a team
+  - (FEATURE) "enterprise team organization remove" removes an org from a team.
+
 ## 0.11.0
 
 - (FEATURE) "enterprise member invite" can invite unaffiliated members of an Enterprise, which do not consume a seat, useful for granting license entitlements without org assignment.
@@ -153,6 +174,7 @@
 | Tag                | Description
 |--------------------|------------
 | BUGFIX             | something was wrong before, and now it isn't.
+| CALLOUT            | something notable.
 | ENHANCEMENT        | something worked before, but now it works _better_.
 | DEPENDENCY/ADD     | added a dependency to this crate that is already used in the project.
 | DEPENDENCY/NEW     | added a dependency to the project.
