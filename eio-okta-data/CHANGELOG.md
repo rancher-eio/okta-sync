@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2
+
+- (DEPENDENCY) struct-patch 0.10.5 -> 0.11.0
+
 ## 0.5.1
 
 - (DEPENDENCY) fake 4.4.0 -> 5.1.0

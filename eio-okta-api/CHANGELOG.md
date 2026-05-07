@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.2
+
+- (DEPENDENCY) eio-okta-data 0.5.1 -> 0.5.2
+
 ## 0.6.1
 
 - (DEPENDENCY) serde_qs 0.15.0 -> 1.1.0

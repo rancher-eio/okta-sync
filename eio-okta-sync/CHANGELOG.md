@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.1
+
+- (DEPENDENCY) eio-okta-api 0.6.1 -> 0.6.2
+- (DEPENDENCY) eio-okta-client 0.4.2 -> 0.4.3
+- (DEPENDENCY) eio-okta-data 0.5.1 -> 0.5.2
+- (DEPENDENCY) fancy-regex 0.17.0 -> 0.18.0
+- (DEPENDENCY) octocrab 0.49.9 -> 0.50.0
+
 ## 0.13.0
 
 - (FEATURE) "enterprise member(s)" has several new subcommands:
