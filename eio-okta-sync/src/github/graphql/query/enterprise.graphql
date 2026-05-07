@@ -1,10 +1,11 @@
 query Query(
-  $enterprise:String!,
+  $enterpriseSlug:String!,
 ) {
-  enterprise(slug:$enterprise) {
+  enterprise(slug:$enterpriseSlug) {
     databaseId
     id
     name
+    slug
     viewerIsAdmin
   }
 }

@@ -19,13 +19,8 @@ pub struct Command {
     help          = "file to write output to"
   )]
   output: Utf8PathBuf,
-  #[arg(
-    env        = "GITHUB_TOKEN",
-    long       = "token",
-    value_name = "TOKEN",
-    help       = "GitHub Access Token",
-  )]
-  token: String,
+  #[command(flatten)]
+  token: crate::args::github::Token,
 }
 
 impl Command {

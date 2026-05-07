@@ -4,7 +4,7 @@ pub mod query {
   #![allow(dead_code)]
   use std::result::Result;
   pub const OPERATION_NAME: &str = "Query";
-  pub const QUERY : & str = "query Query(\n  $enterpriseSlug:String!,\n) {\n  enterprise(slug:$enterpriseSlug) {\n    databaseId\n    id\n    name\n    slug\n    viewerIsAdmin\n  }\n}\n" ;
+  pub const QUERY : & str = "query Query($userLogin:String!) {\n  user(login:$userLogin) {\n    databaseId\n    email\n    id\n    login\n  }\n}\n" ;
   use super::*;
   use serde::{Deserialize, Serialize};
   #[allow(dead_code)]
@@ -18,25 +18,23 @@ pub mod query {
   #[derive(Serialize, Debug, Clone, PartialEq, Eq, Hash, Deserialize, bon :: Builder)]
   #[serde(crate = ":: serde")]
   pub struct Variables {
-    #[serde(rename = "enterpriseSlug")]
-    pub enterprise_slug: String,
+    #[serde(rename = "userLogin")]
+    pub user_login: String,
   }
   impl Variables {}
   #[derive(Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
   #[serde(crate = ":: serde")]
   pub struct ResponseData {
-    pub enterprise: Option<QueryEnterprise>,
+    pub user: Option<QueryUser>,
   }
   #[derive(Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
   #[serde(crate = ":: serde")]
-  pub struct QueryEnterprise {
+  pub struct QueryUser {
     #[serde(rename = "databaseId")]
     pub database_id: Option<Int>,
+    pub email: String,
     pub id: ID,
-    pub name: String,
-    pub slug: String,
-    #[serde(rename = "viewerIsAdmin")]
-    pub viewer_is_admin: Boolean,
+    pub login: String,
   }
 }
 impl graphql_client::GraphQLQuery for Query {

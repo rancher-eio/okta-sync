@@ -34,7 +34,6 @@ update-schema:
 
 regenerate query: ensure-query-directory-exists
     {{ PROG_GRAPHQL_CLIENT }} generate \
-      --fragments-other-variant \
       --response-derives="Debug,Clone,PartialEq,Eq,PartialOrd,Ord,Hash,Serialize,Deserialize" \
       --schema-path="{{ GRAPHQL_SCHEMA_DIRECTORY }}/{{ GRAPHQL_SCHEMA_FILENAME }}" \
       --variables-derives="Debug,Clone,PartialEq,Eq,Hash,Deserialize,bon::Builder" \

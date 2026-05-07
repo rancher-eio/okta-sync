@@ -1,0 +1,7 @@
+query Query($organizationLogin:String!) {
+  organization(login:$organizationLogin) {
+    databaseId
+    id
+    login
+  }
+}
