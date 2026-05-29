@@ -1,6 +1,7 @@
 #![allow(clippy::result_large_err)]
 
 pub(crate) mod args;
+pub(crate) mod authentik;
 pub mod command;
 pub mod crossplane;
 pub mod github;
@@ -18,6 +19,8 @@ pub enum Error {
   #[diagnostic(code(argument::validation::betrayal))]
   #[error("{betrayal}. CLI argument validation should have prevented this. (╯°□°)╯︵ ┻━┻")]
   ArgumentValidationFailedToPrevent { betrayal: &'static str },
+  #[diagnostic(transparent)]
+  Authentik(#[from] authentik::Error),
   #[diagnostic(transparent)]
   Client(#[from] eio_okta_client::Error),
   #[diagnostic(code(response::data::subpar))]

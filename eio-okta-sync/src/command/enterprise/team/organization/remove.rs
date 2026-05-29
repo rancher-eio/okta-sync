@@ -44,7 +44,7 @@ impl Command {
 
     let github = Octocrab::builder().personal_token(token).build()?;
 
-    let result = github
+    github
       .enterprise(&enterprise_slug)
       .team(&team_slug)
       .organizations()

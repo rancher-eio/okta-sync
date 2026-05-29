@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-sync"
-version = "0.13.1"
+version = "0.14.0"
 description = "a VERY specific way to turn Okta Users and Groups into GitHub Members and Teams"
 rust-version.workspace = true
 edition.workspace = true
@@ -16,9 +16,12 @@ eio-okta-client.workspace = true
 eio-okta-data.workspace = true
 
 constcat.workspace = true
+email_address.workspace = true
 fs-err.workspace = true
 heck.workspace = true
+http.workspace = true
 humantime.workspace = true
+paste.workspace = true
 remain.workspace = true
 serde_yml.workspace = true
 tar.workspace = true
@@ -63,6 +66,7 @@ petgraph = { workspace = true, features = ["graphmap", "serde-1", "std"] }
 semver = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true, features = ["derive", "std"] }
 serde_json = { workspace = true, features = ["preserve_order"] }
+strum = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
@@ -74,8 +78,14 @@ update-informer = { workspace = true, features = [
 ] }
 uuid = { workspace = true, features = ["std", "serde"] }
 
+authentik-client = { version = "2026.5.0", default-features = false, features = [
+  "rustls",
+] }
+erased-serde = "0.4.10"
 graphql_client = "0.16.0"
-octocrab = "0.50.0"
+interim = { version = "0.2.1", features = ["chrono_0_4"] }
+nutype = { version = "0.7.0", features = ["serde"] }
+octocrab = "0.51.0"
 rand.workspace = true
 secrecy = "0.10.3"
 

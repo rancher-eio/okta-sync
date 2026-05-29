@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.14.0
+
+- (FEATURE) "authentik" subcommand added with experimental support for reading from Authentik.
+- (DEPENDENCY/ADD) email_address
+- (DEPENDENCY/ADD) http
+- (DEPENDENCY/ADD) paste
+- (DEPENDENCY/ADD) strum
+- (DEPENDENCY/NEW) authentik-client
+- (DEPENDENCY/NEW) erased-serde
+- (DEPENDENCY/NEW) interim
+- (DEPENDENCY/NEW) nutype
+- (DEPENDENCY) octocrab 0.50.0 -> 0.51.0
+
 ## 0.13.1
 
 - (DEPENDENCY) eio-okta-api 0.6.1 -> 0.6.2

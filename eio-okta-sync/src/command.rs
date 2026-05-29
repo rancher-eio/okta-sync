@@ -1,3 +1,4 @@
+mod authentik;
 mod check_version;
 mod current;
 mod enterprise;
@@ -14,6 +15,7 @@ use clap::Parser;
 #[remain::sorted]
 #[command(about = "a tool for populating GitHub Orgs from Okta Users/Groups")]
 pub enum Command {
+  Authentik(authentik::Command),
   CheckVersion(check_version::Command),
   Current(current::Command),
   #[command(subcommand)]
@@ -30,6 +32,7 @@ pub enum Command {
 impl Command {
   pub async fn run(self) -> Result<(), crate::Error> {
     match self {
+      Self::Authentik(command) => command.run().await,
       Self::CheckVersion(command) => command.run(),
       Self::Current(command) => command.run(),
       Self::Enterprise(command) => command.run().await,
