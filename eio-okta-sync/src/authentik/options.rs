@@ -23,7 +23,7 @@ pub(crate) struct AuthentikOptions {
 #[derive(Debug, Clone, Args)]
 #[group(skip)]
 pub(crate) struct AuthentikServiceOptions {
-  #[arg(default_value = "id-stage.suse.com")]
+  #[arg(default_value = "id.suse.com")]
   #[arg(env = "AUTHENTIK_SERVICE_AUTHORITY")]
   #[arg(help = "Host and (optional) Port for Authentik Service")]
   #[arg(help_heading = "Authentik Service Options")]

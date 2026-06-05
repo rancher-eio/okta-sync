@@ -46,12 +46,48 @@ pub(crate) mod api {
       #[command(about = "Group Operations")]
       #[remain::sorted]
       pub(crate) enum Command {
+        Create(Box<Wrapper<api::CoreGroupsCreate>>),
+        Destroy(Box<Wrapper<api::CoreGroupsDestroy>>),
         List(Box<Wrapper<api::CoreGroupsList>>),
+        ListUsedBy(Box<Wrapper<api::CoreGroupsUsedByList>>),
         #[command(alias = "get")]
         Retrieve(Box<Wrapper<api::CoreGroupsRetrieve>>),
+        #[command(subcommand)]
+        Update(update::Command),
+        #[command(subcommand)]
+        User(user::Command),
       }
 
-      crate::authentik::macros::RunAsync!(Command as [List, Retrieve]);
+      crate::authentik::macros::RunAsync!(Command as [Create, Destroy, List, ListUsedBy, Retrieve, Update, User]);
+
+      pub(crate) mod update {
+        use crate::authentik::{api, command::Wrapper};
+
+        #[derive(Debug, Clone, clap::Subcommand)]
+        #[command(about = "Group Update Operations")]
+        #[remain::sorted]
+        pub(crate) enum Command {
+          #[command(alias = "replace")]
+          Overwrite(Box<Wrapper<api::CoreGroupsUpdate>>),
+          Patch(Box<Wrapper<api::CoreGroupsPartialUpdate>>),
+        }
+
+        crate::authentik::macros::RunAsync!(Command as [Overwrite, Patch]);
+      }
+
+      pub(crate) mod user {
+        use crate::authentik::{api, command::Wrapper};
+
+        #[derive(Debug, Clone, clap::Subcommand)]
+        #[command(about = "Group User Operations")]
+        #[remain::sorted]
+        pub(crate) enum Command {
+          Add(Box<Wrapper<api::CoreGroupsAddUserCreate>>),
+          Remove(Box<Wrapper<api::CoreGroupsRemoveUserCreate>>),
+        }
+
+        crate::authentik::macros::RunAsync!(Command as [Add, Remove]);
+      }
     }
 
     pub(crate) mod tokens {

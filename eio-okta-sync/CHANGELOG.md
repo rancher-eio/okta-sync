@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.15.0
+
+- (FEATURE) "authentik" subcommand extended with write operations for group management.
+- (INTERNAL) `AUTHENTIK_SERVICE_AUTHORITY` no longer defaults to a staging URL. Note that ANY default value is almost certainly _wrong_ for everyone other than the maintainers of this tool, so this is not considered a "breaking" change, since if you use this feature, you should be setting this value appropriately already, which would be the recommended mitigation, if needed.
+
 ## 0.14.0
 
 - (FEATURE) "authentik" subcommand added with experimental support for reading from Authentik.
