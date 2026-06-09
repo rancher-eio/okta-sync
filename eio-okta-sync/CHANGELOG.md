@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.1
+
+- (DEPENDENCY) tar 0.4.44 -> 0.4.46 (Fixes [GHSA-3pv8-6f4r-ffg2](https://github.com/advisories/GHSA-3pv8-6f4r-ffg2))
+
 ## 0.15.0
 
 - (FEATURE) "authentik" subcommand extended with write operations for group management.
