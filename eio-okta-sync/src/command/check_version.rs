@@ -3,7 +3,7 @@ use std::{str::FromStr, time::Duration};
 use camino::Utf8PathBuf;
 use iri_string::types::{UriAbsoluteString, UriRelativeString};
 use semver::Version;
-use update_informer::{registry, Check};
+use update_informer::{Check, registry};
 
 #[derive(Debug, Clone, clap::Args)]
 #[remain::sorted]
@@ -124,7 +124,7 @@ impl Format {
   fn serialize<T: serde::Serialize>(self, value: &T) -> Result<String, crate::Error> {
     match self {
       Self::Json => serde_json::to_string_pretty(value).map_err(Into::into),
-      Self::Yaml => serde_yml::to_string(value).map_err(Into::into),
+      Self::Yaml => serde_saphyr::to_string(value).map_err(Into::into),
     }
   }
 }

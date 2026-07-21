@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.3
+
+- (DEPENDENCY) comparable 0.5.4 -> 0.5.7
+- (DEPENDENCY) educe 0.6.0 -> 0.7.4
+- (DEPENDENCY) struct-patch 0.11.0 -> 0.12.7
+- (DEPENDENCY/REPLACE) serde_yml -> serde-saphyr
+
 ## 0.5.2
 
 - (DEPENDENCY) struct-patch 0.10.5 -> 0.11.0

@@ -46,8 +46,10 @@ pub enum Error {
   MissingGithubAccessToken,
   #[diagnostic(code(::octocrab))]
   Octocrab(#[from] octocrab::Error),
-  #[diagnostic(code(::serde_yml))]
-  Yaml(#[from] serde_yml::Error),
+  #[diagnostic(code(::serde_saphyr))]
+  YamlDeserialize(#[from] serde_saphyr::Error),
+  #[diagnostic(code(::serde_saphyr::ser))]
+  YamlSerialize(#[from] serde_saphyr::ser::Error),
 }
 
 pub trait MapInto<T, E> {

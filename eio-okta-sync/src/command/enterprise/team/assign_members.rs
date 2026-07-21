@@ -153,7 +153,7 @@ impl Command {
       }
     };
 
-    eprintln!("team exists: '{}' ({})", &team.slug, &team.id);
+    eprintln!("team exists: '{}' ({})", team.slug, team.id);
 
     eprintln!("loading Okta snapshot: {snapshot}");
     let snapshot = Snapshot::read_from_file(snapshot)?;
@@ -189,7 +189,7 @@ impl Command {
         }
         eprintln!(
           "finding users in org graph from user '{}' ({})...",
-          &root.id,
+          root.id,
           root.display_name()
         );
 
@@ -221,7 +221,7 @@ impl Command {
 
     eprintln!("users in both Okta and GitHub Org: {}", matched_users.len());
 
-    eprintln!("finding all users in Enterprise Team '{}'", &team.slug);
+    eprintln!("finding all users in Enterprise Team '{}'", team.slug);
     let enterprise_team_members = github
       .all_pages(
         enterprise
@@ -241,7 +241,7 @@ impl Command {
     eprintln!(
       "found {} users in Enterprise Team '{}'",
       enterprise_team_members.len(),
-      &team.slug
+      team.slug
     );
 
     let missing_users = matched_users
@@ -250,7 +250,7 @@ impl Command {
       .collect_vec();
 
     if missing_users.is_empty() {
-      eprintln!("team '{}' already contains all expected users", &team.slug);
+      eprintln!("team '{}' already contains all expected users", team.slug);
     } else {
       let total = missing_users.len();
       for chunk in missing_users.chunks(100) {
@@ -258,12 +258,12 @@ impl Command {
           "adding {} of {} missing users to team '{}'",
           chunk.len(),
           total,
-          &team.slug
+          team.slug
         );
 
         if dry_run {
           for user in chunk {
-            eprintln!("(dry-run) for team '{}', skip adding user '{user}'", &team.slug);
+            eprintln!("(dry-run) for team '{}', skip adding user '{user}'", team.slug);
           }
         } else {
           enterprise
@@ -281,22 +281,22 @@ impl Command {
     let unexpected_users = enterprise_team_members.difference(&okta_users).cloned().collect_vec();
 
     if unexpected_users.is_empty() {
-      eprintln!("team '{}' contains no unexpected users", &team.slug);
+      eprintln!("team '{}' contains no unexpected users", team.slug);
     } else {
       let total = unexpected_users.len();
-      eprintln!("team '{}' contains {} unexpected users", &team.slug, total);
+      eprintln!("team '{}' contains {} unexpected users", team.slug, total);
       if strict {
         for chunk in unexpected_users.chunks(100) {
           eprintln!(
             "removing {} of {} unexpected users from team '{}'",
             chunk.len(),
             total,
-            &team.slug
+            team.slug
           );
 
           if dry_run {
             for user in chunk {
-              eprintln!("(dry-run) for team '{}', skip removing user '{user}'", &team.slug);
+              eprintln!("(dry-run) for team '{}', skip removing user '{user}'", team.slug);
             }
           } else {
             enterprise

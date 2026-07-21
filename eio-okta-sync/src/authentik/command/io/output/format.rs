@@ -17,7 +17,7 @@ pub enum OutputFormatError {
   #[diagnostic(code(io::output::format::json))]
   Json(serde_json::Error),
   #[diagnostic(code(io::output::format::yaml))]
-  Yaml(serde_yml::Error),
+  Yaml(serde_saphyr::ser::Error),
 }
 
 impl OutputFormat {
@@ -25,7 +25,7 @@ impl OutputFormat {
     match self {
       Self::CompactJson => serde_json::to_string(value).map_err(OutputFormatError::Json),
       Self::Json => serde_json::to_string_pretty(value).map_err(OutputFormatError::Json),
-      Self::Yaml => serde_yml::to_string(value).map_err(OutputFormatError::Yaml),
+      Self::Yaml => serde_saphyr::to_string(value).map_err(OutputFormatError::Yaml),
     }
   }
 }

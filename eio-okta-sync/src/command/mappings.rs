@@ -52,7 +52,7 @@ impl Command {
       teams: teams(&snapshot, interactive)?,
     };
 
-    let yaml = serde_yml::to_string(&mappings)?;
+    let yaml = serde_saphyr::to_string(&mappings)?;
 
     println!("{yaml}");
 

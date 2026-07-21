@@ -13,7 +13,7 @@ pub struct Snapshot {
 fn main() {
   let path = PathBuf::from("../../snapshot.yaml");
   let file = File::open(path).unwrap();
-  let snapshot: Snapshot = serde_yml::from_reader(file).unwrap();
+  let snapshot: Snapshot = serde_saphyr::from_reader(file).unwrap();
 
   let user1 = snapshot.users.iter().find(|user| user.profile.email.eq("user-1@company.com")).unwrap();
   let user2 = snapshot.users.iter().find(|user| user.profile.email.eq("user-2@company.com")).unwrap();

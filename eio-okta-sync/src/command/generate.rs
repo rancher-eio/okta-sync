@@ -379,7 +379,7 @@ impl Command {
       let mut buf = Vec::new();
       let mut file = File::open(mappings)?;
       file.read_to_end(&mut buf)?;
-      serde_yml::from_slice(&buf)?
+      serde_saphyr::from_slice(&buf)?
     };
 
     let snapshot = Snapshot::read_from_file(snapshot)?;
@@ -397,7 +397,7 @@ impl Command {
           if group.profile.name != profile_name.as_str() {
             eprintln!(
               "expected profile name: '{profile_name}', but found '{}' instead",
-              &group.profile.name
+              group.profile.name
             );
             failed = true;
           }
@@ -424,7 +424,7 @@ impl Command {
 
       for user in &snapshot.users {
         if mappings.include_users.matches(user)? {
-          eprintln!("Including User (Config): {}", &user.profile.email);
+          eprintln!("Including User (Config): {}", user.profile.email);
           users.insert(user);
         }
       }
@@ -444,12 +444,12 @@ impl Command {
 
     for user in users {
       if !user.status.is_active() {
-        eprintln!("Skipping User (Status is {}): {}", &user.status, &user.profile.email);
+        eprintln!("Skipping User (Status is {}): {}", user.status, user.profile.email);
         continue;
       }
 
       if mappings.exclude_users.matches(user)? {
-        eprintln!("Excluding User (Config): {}", &user.profile.email);
+        eprintln!("Excluding User (Config): {}", user.profile.email);
         continue;
       }
 
@@ -460,7 +460,7 @@ impl Command {
           if !valid_github_username.is_match(&username)? {
             eprintln!(
               "Skipping User (Invalid GitHub Username ('{}')): {}",
-              &username, &user.profile.email
+              username, user.profile.email
             );
             continue;
           }
@@ -527,14 +527,14 @@ impl Command {
           } else {
             eprintln!(
               "Skipping User (Okta Profile has no GitHub Orgs): {}",
-              &user.profile.email
+              user.profile.email
             );
           }
         }
       } else {
         eprintln!(
           "Skipping User (Okta Profile has no GitHub Usernames): {}",
-          &user.profile.email
+          user.profile.email
         );
       }
     }
@@ -675,7 +675,7 @@ impl Command {
       resources.push(serde_json::to_value(&resource)?);
     }
 
-    let yaml = serde_yml::to_string(&resources)?;
+    let yaml = serde_saphyr::to_string(&resources)?;
 
     fs_err::write(output, &yaml)?;
 

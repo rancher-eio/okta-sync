@@ -63,7 +63,7 @@ impl Command {
       snapshot.group_users.insert(group.id.clone(), members);
     }
 
-    let yaml = serde_yml::to_string(&snapshot)?;
+    let yaml = serde_saphyr::to_string(&snapshot)?;
 
     fs_err::write(&output, yaml)?;
 

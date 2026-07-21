@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-data"
-version = "0.5.2"
+version = "0.5.3"
 description = "Data Types for Okta"
 rust-version.workspace = true
 edition.workspace = true
@@ -53,6 +53,7 @@ macro_rules_attribute.workspace = true
 mediatype.workspace = true
 remain.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
+serde-saphyr = { workspace = true, features = ["deserialize", "miette", "serialize"] }
 
 arbitrary = { workspace = true, optional = true, features = ["derive"] }
 bon = { workspace = true, optional = true, features = ["alloc", "std"] }
@@ -91,4 +92,3 @@ struct-patch = { workspace = true, optional = true, features = [
 strum = { workspace = true, optional = true, features = ["derive", "std"] }
 test-strategy = { workspace = true, optional = true }
 validator = { workspace = true, optional = true, features = ["derive"] }
-serde_yml.workspace = true

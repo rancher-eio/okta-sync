@@ -31,7 +31,7 @@ impl Command {
     let github = octocrab::OctocrabBuilder::new().personal_token(token).build()?;
     let members = github.all_pages(github.orgs(&org).list_members().send().await?).await?;
 
-    let yaml = serde_yml::to_string(&members)?;
+    let yaml = serde_saphyr::to_string(&members)?;
 
     fs_err::write(&output, &yaml)?;
 

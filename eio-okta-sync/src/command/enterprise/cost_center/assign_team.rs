@@ -118,7 +118,7 @@ impl Command {
       }
     };
 
-    eprintln!("cost center exists: {}", &cost_center.id);
+    eprintln!("cost center exists: {}", cost_center.id);
 
     let users = github
       .all_pages(
@@ -143,8 +143,8 @@ impl Command {
         "assigning {} of {} users to cost center {} ({})...",
         chunk.len(),
         total,
-        &cost_center.id,
-        &cost_center.name
+        cost_center.id,
+        cost_center.name
       );
 
       if dry_run {

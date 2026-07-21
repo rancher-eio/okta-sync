@@ -106,7 +106,7 @@ impl TryFrom<octocrab::models::Author> for OrgMembership {
       site_admin,
       starred_url: starred_url.as_str().try_into()?,
       subscriptions_url: subscriptions_url.as_str().try_into()?,
-      type_: serde_yml::from_str(&type_)?,
+      type_: serde_saphyr::from_str(&type_)?,
       url: url.as_str().try_into()?,
     };
 
@@ -135,7 +135,7 @@ impl Command {
       let mut buf = Vec::new();
       let mut file = File::open(&members)?;
       file.read_to_end(&mut buf)?;
-      serde_yml::from_slice(&buf)?
+      serde_saphyr::from_slice(&buf)?
     };
 
     let mut resources = Vec::with_capacity(members.len());
@@ -176,7 +176,7 @@ impl Command {
       resources.push(resource);
     }
 
-    let yaml = serde_yml::to_string(&resources)?;
+    let yaml = serde_saphyr::to_string(&resources)?;
 
     fs_err::write(&output, &yaml)?;
 

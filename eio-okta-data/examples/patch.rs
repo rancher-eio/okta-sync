@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, fs::File, path::PathBuf};
 
 use comparable::Comparable;
-use eio_okta_data::v2024_07_0::management::components::schemas::{user_profile::UserProfilePatch, Group, User};
+use eio_okta_data::v2024_07_0::management::components::schemas::{Group, User, user_profile::UserProfilePatch};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct Snapshot {
@@ -13,7 +13,7 @@ pub struct Snapshot {
 fn main() {
   let path = PathBuf::from("../../snapshot.yaml");
   let file = File::open(path).unwrap();
-  let snapshot: Snapshot = serde_yml::from_reader(file).unwrap();
+  let snapshot: Snapshot = serde_saphyr::from_reader(file).unwrap();
 
   let user = snapshot.users.iter().find(|user| user.profile.email.eq("user@company.com")).unwrap().to_owned();
 
@@ -28,7 +28,7 @@ fn main() {
 
   println!("DIFF: {:#?}", &diff);
 
-  let json = serde_yml::to_string(&patched).unwrap();
+  let json = serde_saphyr::to_string(&patched).unwrap();
 
   println!("{json}");
 }

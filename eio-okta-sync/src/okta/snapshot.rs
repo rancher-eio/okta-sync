@@ -13,7 +13,7 @@ pub struct Snapshot {
 impl Snapshot {
   pub(crate) fn read_from_file(path: impl AsRef<Path>) -> Result<Self, crate::Error> {
     let yaml = fs_err::read_to_string(path)?;
-    let this = serde_yml::from_str(&yaml)?;
+    let this = serde_saphyr::from_str(&yaml)?;
     Ok(this)
   }
 }

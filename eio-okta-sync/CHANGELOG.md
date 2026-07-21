@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.16.0
+
+- (BREAKING) `Error::Yaml` variant removed.
+  - (BREAKING/MITIGATION) use `Error::YamlDeserialize` or `Error::YamlSerialize` instead.
+- (BREAKING) `Error` no longer implements `From<serde_yml::Error>`.
+  - (BREAKING/MITIGATION) transition to serde-saphyr
+- (DEPENDENCY) educe 0.6.0 -> 0.7.4
+- (DEPENDENCY) eio-okta-api 0.6.2 -> 0.6.3
+- (DEPENDENCY) eio-okta-client 0.4.3 -> 0.4.4
+- (DEPENDENCY) eio-okta-data 0.5.2 -> 0.5.3
+- (DEPENDENCY) itertools 0.14.0 -> 0.15.0
+- (DEPENDENCY/REPLACE) serde_yml -> serde-saphyr
+- (INTERNAL) fix 24 clippy warnings
+
 ## 0.15.1
 
 - (DEPENDENCY) tar 0.4.44 -> 0.4.46 (Fixes [GHSA-3pv8-6f4r-ffg2](https://github.com/advisories/GHSA-3pv8-6f4r-ffg2))
@@ -234,6 +248,7 @@
 | ENHANCEMENT        | something worked before, but now it works _better_.
 | DEPENDENCY/ADD     | added a dependency to this crate that is already used in the project.
 | DEPENDENCY/NEW     | added a dependency to the project.
+| DEPENDENCY/REPLACE | replace one dependency with another.
 | INTERNAL           | noted for reference, but does not affect public interfaces.
 | LIB                | changes something about the library in a backwards-compatible way.
 | BREAKING/BUILD     | changes something about the build and requires changes.

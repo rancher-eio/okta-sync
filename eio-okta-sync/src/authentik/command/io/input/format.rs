@@ -17,7 +17,7 @@ pub enum InputFormatError {
   #[diagnostic(code(io::input::format::json::value))]
   JsonValue(serde_json::Error),
   #[diagnostic(code(io::input::format::yaml::value))]
-  YamlValue(serde_yml::Error),
+  YamlValue(serde_saphyr::Error),
 }
 
 impl InputFormat {
@@ -30,13 +30,10 @@ impl InputFormat {
           Ok(deserializer) => Ok(Box::new(<dyn Deserializer>::erase(deserializer))),
         }
       }
-      Self::Yaml => {
-        let deserializer = serde_yml::Deserializer::from_slice(bytes);
-        match serde_yml::Value::deserialize(deserializer) {
-          Err(error) => Err(InputFormatError::YamlValue(error)),
-          Ok(deserializer) => Ok(Box::new(<dyn Deserializer>::erase(deserializer))),
-        }
-      }
+      Self::Yaml => match serde_saphyr::from_slice::<serde_json::Value>(bytes) {
+        Err(error) => Err(InputFormatError::YamlValue(error)),
+        Ok(deserializer) => Ok(Box::new(<dyn Deserializer>::erase(deserializer))),
+      },
     }
   }
 }

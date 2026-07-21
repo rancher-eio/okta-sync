@@ -1,7 +1,7 @@
 use std::io::{Cursor, Write};
 
 use camino::Utf8PathBuf;
-use serde_yml::Value;
+use serde_json::Value;
 use tar::{Builder, Header};
 
 use crate::{
@@ -120,7 +120,7 @@ impl Command {
     } = self;
 
     let resources_yaml = fs_err::read_to_string(&resources_path)?;
-    let mut resources: Vec<Resource<ManagedResource<Value>>> = serde_yml::from_str(&resources_yaml)?;
+    let mut resources: Vec<Resource<ManagedResource<Value>>> = serde_saphyr::from_str(&resources_yaml)?;
 
     let mut archive = Builder::new(Cursor::new(Vec::new()));
 
@@ -141,7 +141,7 @@ impl Command {
         if force_yaml_start_of_document {
           entry.write_all(YAML_START_OF_DOCUMENT.as_bytes())?;
         }
-        serde_yml::to_writer(&mut entry, &resource)?;
+        serde_saphyr::to_io_writer(&mut entry, &resource)?;
         if force_yaml_end_of_document {
           entry.write_all(YAML_END_OF_DOCUMENT.as_bytes())?;
         }
