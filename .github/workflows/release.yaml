@@ -13,6 +13,8 @@ on:
 jobs:
   build-binaries:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         architecture: [amd64, arm64]
