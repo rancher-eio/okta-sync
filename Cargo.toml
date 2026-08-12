@@ -65,7 +65,7 @@ headers = { version = "0.4.1", default-features = false }
 macro_rules_attribute = { version = "0.2.2", default-features = false }
 proptest-derive = { version = "0.8.0", default-features = false }
 serde-saphyr = { version = "0.0.29", default-features = false }
-validator = { version = "0.20.0", default-features = false }
+validator = { version = "0.21.0", default-features = false }
 
 # no features
 heck = "0.5.0"
