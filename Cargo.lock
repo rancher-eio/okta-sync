@@ -315,7 +315,7 @@ version = "3.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dee98b0db6a962de883bf5d20362dee4d7ca0d12fe39a7c6c73c844e1cd7c1f"
 dependencies = [
- "darling 0.23.0",
+ "darling 0.20.11",
  "ident_case",
  "prettyplease",
  "proc-macro2",
@@ -776,6 +776,7 @@ dependencies = [
  "ident_case",
  "proc-macro2",
  "quote",
+ "strsim",
  "syn 2.0.119",
 ]
 
@@ -3465,9 +3466,9 @@ dependencies = [
 
 [[package]]
 name = "scim_proto"
-version = "1.10.4"
+version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcf4b9267d92f1332f131bb7162c0524a66d6760a8b8316890f74339e8c81b9d"
+checksum = "b0cc7a1c558518bbbeda138b07ee6dba7e9dc2bf2a03daece970ec725f57b67c"
 dependencies = [
  "base64urlsafedata",
  "peg",
