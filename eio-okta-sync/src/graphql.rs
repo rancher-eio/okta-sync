@@ -160,7 +160,15 @@ pub(crate) trait ExecuteQuery: GraphQLQuery {
     client: &octocrab::Octocrab,
   ) -> octocrab::Result<SinglePageResponse<Self::ResponseData>> {
     let payload = Self::build_query(variables);
-    client.graphql(&payload).await
+
+    // for debugging cases where octocrab's deserialization obscures the underlying issue.
+    if std::env::var("BARF_JSON_ALL_OVER_MY_CONSOLE").is_ok_and(|value| value == "please") {
+      let json: serde_json::Value = client.post("/graphql", Some(&payload)).await?;
+      eprintln!("{json}");
+      Ok(serde_json::from_value(json).expect("displeasingly shaped JSON"))
+    } else {
+      client.post("/graphql", Some(&payload)).await
+    }
   }
 }
 

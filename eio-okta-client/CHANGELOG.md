@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.5
+
+- (DEPENDENCY) eio-okta-api 0.6.3 -> 0.6.4
+
 ## 0.4.4
 
 - (DEPENDENCY) educe 0.6.0 -> 0.7.4

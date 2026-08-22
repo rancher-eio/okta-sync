@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.4
+
+- (DEPENDENCY) mediatype 0.21.0 -> 0.23.0
+- (DEPENDENCY) serde-saphyr 0.0.29 -> 1.1.0
+- (DEPENDENCY) struct-patch 0.12.7 -> 0.13.2
+- (DEPENDENCY) validator 0.20.0 -> 0.21.0
+
 ## 0.5.3
 
 - (DEPENDENCY) comparable 0.5.4 -> 0.5.7

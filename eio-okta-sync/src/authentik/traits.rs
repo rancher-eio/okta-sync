@@ -7,6 +7,7 @@ pub trait Paginated {
 
   fn pagination(&self) -> &Pagination;
   fn results(self) -> Self::Results;
+  fn len(&self) -> usize;
 }
 
 pub trait PageMut {
@@ -43,14 +44,24 @@ where
     configuration: &Configuration,
   ) -> Result<<Self::Value as Paginated>::Results, Self::Error> {
     let page = self.clone().get_with_configuration(configuration).await?;
-    let mut next = page.pagination().next > 0.0;
+    let mut next = page.pagination().next > f64::EPSILON;
 
+    let count = page.pagination().count;
+    let mut total = page.len();
     let mut results = page.results();
 
     while next {
-      self.page_mut().get_or_insert(&mut 0).add_assign(1);
+      match self.page_mut() {
+        Some(page) => {
+          eprintln!("fetched page {page}, found {total}/{count} items so far...");
+          page.add_assign(1)
+        }
+        None => panic!("page_mut() returned None on an active pagination loop"),
+      }
+
       let page = self.clone().get_with_configuration(configuration).await?;
-      next = page.pagination().next > 0.0;
+      next = page.pagination().next > f64::EPSILON;
+      total.add_assign(page.len());
       results.extend(page.results());
     }
 

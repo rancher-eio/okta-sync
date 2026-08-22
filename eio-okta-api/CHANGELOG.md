@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.4
+
+- (DEPENDENCY) eio-okta-data 0.5.3 -> 0.5.4
+- (DEPENDENCY) validator 0.20.0 -> 0.21.0
+
 ## 0.6.3
 
 - (DEPENDENCY) eio-okta-data 0.5.2 -> 0.5.3

@@ -13,9 +13,9 @@ keywords = ["EIO"]
 
 [workspace.dependencies]
 # Internal Crates
-eio-okta-api = { path = "eio-okta-api", version = "0.6.3" }
-eio-okta-client = { path = "eio-okta-client", version = "0.4.4" }
-eio-okta-data = { path = "eio-okta-data", version = "0.5.3" }
+eio-okta-api = { path = "eio-okta-api", version = "0.6.4" }
+eio-okta-client = { path = "eio-okta-client", version = "0.4.5" }
+eio-okta-data = { path = "eio-okta-data", version = "0.5.4" }
 
 # Dependencies
 bon = { version = "3.8.1", default-features = false }

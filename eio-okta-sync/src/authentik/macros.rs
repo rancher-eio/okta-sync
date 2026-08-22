@@ -56,6 +56,10 @@ macro_rules! Paginated {
         fn results(self) -> Self::Results {
           self.results
         }
+
+        fn len(&self) -> usize {
+          self.results.len()
+        }
       }
     };
   };
@@ -70,7 +74,7 @@ macro_rules! PageMut {
 
       impl PageMut for $T {
         fn page_mut(&mut self) -> Option<&mut i32> {
-          self.page.as_mut()
+          Some(self.page.get_or_insert(1))
         }
       }
     };

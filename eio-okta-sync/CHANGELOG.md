@@ -1,5 +1,13 @@
 # Changelog
 
+- (BUGFIX) fix potential infinite loop in authentik pagination.
+- (BUGFIX) fix "data did not match any variant of untagged enum GraphqlResponse" for some enterprise-related commands that use GitHub's GraphQL API. This bug was first introduced in v0.13.1, due to a change in octocrab 0.49.8, which added more structured response handling.
+- (DEPENDENCY) eio-okta-api 0.6.3 -> 0.6.4
+- (DEPENDENCY) eio-okta-client 0.4.4 -> 0.4.5
+- (DEPENDENCY) eio-okta-data 0.5.3 -> 0.5.4
+- (DEPENDENCY) fancy-regex 0.18.0 -> 0.19.0
+- (DEPENDENCY) serde-saphyr 0.0.29 -> 1.1.0
+
 ## 0.16.0
 
 - (BREAKING) `Error::Yaml` variant removed.
