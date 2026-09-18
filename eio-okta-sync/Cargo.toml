@@ -85,7 +85,7 @@ erased-serde = "0.4.10"
 graphql_client = "0.16.0"
 interim = { version = "0.2.1", features = ["chrono_0_4"] }
 nutype = { version = "0.7.0", features = ["serde"] }
-octocrab = "= 0.54.1"
+octocrab = "= 0.54.2"
 rand.workspace = true
 secrecy = "0.10.3"
 
