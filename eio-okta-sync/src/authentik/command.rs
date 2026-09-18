@@ -4,13 +4,24 @@ mod wrapper;
 
 pub(crate) use wrapper::Wrapper;
 
+use crate::authentik::traits::RunAsync;
+
 #[derive(Debug, Clone, clap::Subcommand)]
 pub(crate) enum Command {
   #[command(subcommand)]
   Api(api::Command),
+  #[command(subcommand)]
+  Convert(super::convert::Command),
 }
 
-crate::authentik::macros::RunAsync!(Command as [Api]);
+impl Command {
+  pub(crate) async fn run(self) -> Result<(), crate::Error> {
+    match self {
+      Self::Api(command) => Ok(command.run().await?),
+      Self::Convert(command) => Ok(command.run()?),
+    }
+  }
+}
 
 pub(crate) mod api {
   #[derive(Debug, Clone, clap::Subcommand)]

@@ -1,8 +1,12 @@
-use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize, bon::Builder)]
+#[builder(on(String, into))]
 #[serde(rename_all = "camelCase")]
-// #[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[non_exhaustive]
 #[remain::sorted]
 pub struct UserProfileExtensions {
@@ -96,4 +100,10 @@ pub struct UserProfileExtensions {
   pub work_location_type: Option<String>,
   #[serde(default, skip_serializing_if = "Option::is_none", rename = "workdayID")]
   pub workday_id: Option<String>,
+}
+
+impl UserProfileExtensions {
+  pub(crate) fn into_opaque(self) -> BTreeMap<String, Value> {
+    serde_json::from_value(serde_json::to_value(self).unwrap()).unwrap()
+  }
 }

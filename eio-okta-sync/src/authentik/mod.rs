@@ -4,8 +4,10 @@ use authentik_client::apis::configuration::Configuration;
 
 mod api;
 mod command;
+mod convert;
 mod date_time;
 mod macros;
+mod models;
 mod options;
 mod prelude;
 pub(crate) mod traits;

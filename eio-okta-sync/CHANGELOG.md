@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.17.0
+
+- (FEATURE) added "authentik convert users" subcommand to convert authentik users into okta users for compatibility.
+- (DEPENDENCY) octocrab pinned to 0.54.1, due to API change in 0.54.2.
+
 ## 0.16.1
 
 - (BUGFIX) fix potential infinite loop in authentik pagination.
