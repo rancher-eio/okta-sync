@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.17.1
+
+- (BUGFIX) fixed an issue with argument handling for the "authentik convert users" command.
+- (FEATURE) added additional authentik subcommands: "convert groups" and "convert snapshot".
+
 ## 0.17.0
 
 - (FEATURE) added "authentik convert users" subcommand to convert authentik users into okta users for compatibility.

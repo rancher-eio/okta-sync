@@ -16,7 +16,7 @@ pub(crate) struct Command {
   #[arg(default_value_t)]
   #[arg(help("wrap the output in a snapshot (with empty groups/group_users)?"))]
   #[arg(long)]
-  #[arg(num_args(0..1))]
+  #[arg(num_args(0..=1))]
   #[arg(require_equals(true))]
   #[arg(value_name("BOOL"))]
   as_snapshot: bool,

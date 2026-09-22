@@ -1,7 +1,9 @@
-use authentik_client::models::User as AuthentikUser;
+use authentik_client::models::{Group as AuthentikGroup, User as AuthentikUser};
+use chrono::{DateTime, Utc};
 use eio_okta_data::current::management::components::schemas::{
-  AuthenticationProvider, AuthenticationProviderType, HrefObject, LinksSelf, User as OktaUser, UserCredentials,
-  UserProfile, UserStatus, UserType, user::Links,
+  AuthenticationProvider, AuthenticationProviderType, Group as OktaGroup, GroupProfile, GroupType, HrefObject,
+  LinksSelf, User as OktaUser, UserCredentials, UserProfile, UserStatus, UserType, group::Links as GroupLinks,
+  user::Links as UserLinks,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -15,6 +17,15 @@ pub(crate) struct User(AuthentikUser);
 impl From<AuthentikUser> for User {
   fn from(user: AuthentikUser) -> Self {
     Self(user)
+  }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct Group(AuthentikGroup);
+
+impl From<AuthentikGroup> for Group {
+  fn from(group: AuthentikGroup) -> Self {
+    Self(group)
   }
 }
 
@@ -195,8 +206,8 @@ static CREDENTIALS: LazyLock<UserCredentials> = LazyLock::new(|| {
     .build()
 });
 
-static LINKS: LazyLock<Links> = LazyLock::new(|| {
-  Links::builder()
+static USER_LINKS: LazyLock<UserLinks> = LazyLock::new(|| {
+  UserLinks::builder()
     .self_link(
       LinksSelf::builder()
         .self_link(
@@ -209,6 +220,31 @@ static LINKS: LazyLock<Links> = LazyLock::new(|| {
     )
     .build()
 });
+
+static GROUP_LINKS: LazyLock<GroupLinks> = LazyLock::new(|| {
+  GroupLinks::builder()
+    .apps(
+      HrefObject::builder()
+        .href("/")
+        .type_("application/json".parse().unwrap())
+        .build(),
+    )
+    .logo(Vec::new())
+    .users(
+      HrefObject::builder()
+        .href("/")
+        .type_("application/json".parse().unwrap())
+        .build(),
+    )
+    .build()
+});
+
+fn group_links(id: &str) -> GroupLinks {
+  let mut links = GROUP_LINKS.clone();
+  links.apps.href = format!("/api/v1/groups/{id}/apps");
+  links.users.href = format!("/api/v1/groups/{id}/users");
+  links
+}
 
 impl TryFrom<User> for OktaUser {
   type Error = serde_json::Error;
@@ -308,7 +344,7 @@ impl TryFrom<User> for OktaUser {
       )
       .maybe_last_login(last_login.unwrap_or_default().map(Into::into))
       .last_updated(last_updated.into())
-      .links(LINKS.clone())
+      .links(USER_LINKS.clone())
       .password_changed(password_change_date.into())
       .profile(
         UserProfile::builder()
@@ -387,5 +423,104 @@ impl TryIntoOktaUser for AuthentikUser {
 
   fn try_into_okta_user(self) -> Result<OktaUser, Self::Error> {
     User::from(self).try_into()
+  }
+}
+
+pub(crate) trait TryIntoOktaGroup {
+  type Error: std::error::Error;
+
+  fn try_into_okta_group(self) -> Result<OktaGroup, Self::Error>;
+}
+
+impl TryIntoOktaGroup for AuthentikGroup {
+  type Error = serde_json::Error;
+
+  fn try_into_okta_group(self) -> Result<OktaGroup, Self::Error> {
+    Group::from(self).try_into()
+  }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
+#[remain::sorted]
+pub(crate) struct GroupAttributes {
+  #[serde(rename = "cn")]
+  pub cn: String,
+  #[serde(rename = "distinguishedName")]
+  pub distinguished_name: String,
+  #[serde(rename = "ldap_uniq")]
+  pub ldap_uniq: String,
+  #[serde(rename = "modifyTimestamp")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub modify_timestamp: Option<DateTime<Utc>>,
+  #[serde(rename = "notes")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub notes: Option<String>,
+  #[serde(rename = "o")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub o: Option<String>,
+  #[serde(rename = "oktaId")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub okta_id: Option<OktaId>,
+}
+
+impl TryFrom<HashMap<String, Value>> for GroupAttributes {
+  type Error = serde_json::Error;
+
+  fn try_from(value: HashMap<String, Value>) -> Result<Self, Self::Error> {
+    serde_json::from_value(serde_json::to_value(value)?)
+  }
+}
+
+impl TryFrom<Group> for OktaGroup {
+  type Error = serde_json::Error;
+
+  fn try_from(
+    Group(AuthentikGroup {
+      attributes,
+      children: _,
+      children_obj: _,
+      inherited_roles_obj: _,
+      is_superuser: _,
+      name,
+      num_pk: _,
+      parents: _,
+      parents_obj: _,
+      pk: _,
+      roles: _,
+      roles_obj: _,
+      users: _,
+      users_obj: _,
+    }): Group,
+  ) -> Result<Self, Self::Error> {
+    let GroupAttributes {
+      cn: _,
+      distinguished_name: _,
+      ldap_uniq: _,
+      modify_timestamp,
+      notes: _,
+      o: _,
+      okta_id,
+    } = attributes.unwrap_or_default().try_into()?;
+
+    let modify_timestamp = modify_timestamp.unwrap_or_default();
+    let id = okta_id
+      .as_ref()
+      .and_then(|okta| okta.b2e.as_deref())
+      .unwrap_or_default();
+
+    let group = OktaGroup::builder()
+      .created(modify_timestamp)
+      .maybe_embedded(None)
+      .id(id)
+      .last_membership_updated(modify_timestamp)
+      .last_updated(modify_timestamp)
+      .links(group_links(id))
+      .object_class(vec!["okta:user_group".into()])
+      .profile(GroupProfile::builder().name(name).build())
+      .type_(GroupType::OktaGroup)
+      .build();
+
+    Ok(group)
   }
 }
