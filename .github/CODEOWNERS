@@ -1,0 +1,6 @@
+# Ownership is documented here as a comment on purpose: GitHub ignores
+# comments, so this file does not auto-request reviews on pull requests.
+# See .github/OWNERS and
+# https://github.com/rancher-eio/eio-codeowners-enforcer/blob/main/docs/codeowners.md
+#
+# owner: @rancher-eio/eio
