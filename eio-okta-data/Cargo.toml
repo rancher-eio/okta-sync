@@ -1,6 +1,6 @@
 [package]
 name = "eio-okta-data"
-version = "0.5.4"
+version = "0.5.5"
 description = "Data Types for Okta"
 rust-version.workspace = true
 edition.workspace = true

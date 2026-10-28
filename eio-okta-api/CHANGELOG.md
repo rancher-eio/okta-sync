@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.5
+
+- (DEPENDENCY) eio-okta-data 0.5.4 -> 0.5.5
+
 ## 0.6.4
 
 - (DEPENDENCY) eio-okta-data 0.5.3 -> 0.5.4

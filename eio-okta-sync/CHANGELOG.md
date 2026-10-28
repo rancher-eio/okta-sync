@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.17.2
+
+- (BUGFIX) added missing 'notification_setting' field to EnterpriseTeam struct, and added corresponding NotificationSetting enum.
+- (ENHANCEMENT) `#[serde(deny_unknown_fields)]` now only applies to debug builds.
+- (DEPENDENCY) educe 0.7.6 -> 0.8.1
+- (DEPENDENCY) eio-okta-api 0.6.4 -> 0.6.5
+- (DEPENDENCY) eio-okta-client 0.4.5 -> 0.4.6
+- (DEPENDENCY) eio-okta-data 0.5.4 -> 0.5.5
+- (DEPENDENCY) struct-patch 0.13.2 -> 0.14.2
+- (DEPENDENCY) nutype 0.7.0 -> 0.8.0
+
 ## 0.17.1
 
 - (BUGFIX) fixed an issue with argument handling for the "authentik convert users" command.

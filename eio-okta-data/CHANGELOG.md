@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.5
+
+- (DEPENDENCY) educe 0.7.6 -> 0.8.1
+- (DEPENDENCY) struct-patch 0.13.2 -> 0.14.2
+
 ## 0.5.4
 
 - (DEPENDENCY) mediatype 0.21.0 -> 0.23.0

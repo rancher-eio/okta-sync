@@ -4,7 +4,7 @@ use monostate::MustBe;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct EnterpriseTeam {
   pub created_at: DateTime<Utc>,
@@ -15,10 +15,20 @@ pub struct EnterpriseTeam {
   pub id: i64,
   pub members_url: UriTemplateString,
   pub name: String,
+  pub notification_setting: NotificationSetting,
   pub organization_selection_type: OrganizationSelectionType,
   pub slug: String,
   pub updated_at: DateTime<Utc>,
   pub url: UriAbsoluteString,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+#[remain::sorted]
+pub enum NotificationSetting {
+  NotificationsDisabled,
+  #[default]
+  NotificationsEnabled,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
@@ -32,7 +42,7 @@ pub enum OrganizationSelectionType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct EnterpriseTeamMembership {
   pub avatar_url: UriAbsoluteString,
@@ -64,7 +74,7 @@ pub struct ListCostCentersResponse {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct CostCenter {
   pub azure_subscription: Option<Uuid>,
@@ -83,7 +93,7 @@ pub enum CostCenterState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct Resource {
   pub name: String,
@@ -101,7 +111,7 @@ impl From<EnterpriseTeamMembership> for Resource {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct AddedResourcesResponse {
   pub message: String,
@@ -109,7 +119,7 @@ pub struct AddedResourcesResponse {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct ReassignedResource {
   pub name: String,
@@ -118,7 +128,7 @@ pub struct ReassignedResource {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 #[remain::sorted]
 pub struct RemoveResourcesResponse {
   pub message: String,
